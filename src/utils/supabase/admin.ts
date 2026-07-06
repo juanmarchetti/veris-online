@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { type Role } from '@/utils/auth'
 
 // IMPORTANT: SUPABASE_SECRET_KEY must never be exposed to the client
 // or used with a NEXT_PUBLIC_ prefix. This admin client should exclusively
@@ -8,4 +9,16 @@ export function createAdminClient() {
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_SECRET_KEY!
   )
+}
+
+export async function actualizarRolUsuario(userId: string, nuevoRol: Role) {
+  const adminClient = createAdminClient()
+  const { data, error } = await adminClient
+    .from('perfiles')
+    .update({ rol: nuevoRol })
+    .eq('id', userId)
+    .select()
+    .single()
+    
+  return { data, error }
 }
