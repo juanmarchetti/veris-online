@@ -1,5 +1,10 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## 🚨 SECURITY WARNING 🚨
+**ATTENTION:** The `.env.example` file in previous versions of this repository contained real, functional Supabase credentials (including the `SUPABASE_SECRET_KEY` and the `DATABASE_URL` password in plain text). 
+**ACTION REQUIRED IMMEDIATELY:** If you are the owner of this Supabase project, you must **rotate the `service_role key` and the Postgres database password from the Supabase dashboard immediately**. The keys have been exposed and your database is at risk.
+
+
 ## Getting Started
 
 First, run the development server:
