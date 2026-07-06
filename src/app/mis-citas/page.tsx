@@ -1,20 +1,53 @@
 import { verificarUsuario } from '@/utils/auth'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { expirarPagosPendientes } from '@/utils/expirarPagos'
+import Link from 'next/link'
 
-// Interface estricta requerida por la arquitectura
 type CitaRespuesta = {
-  id: string;
-  fecha_hora: string;
-  estado: string;
-  enlace_zoom: string | null;
-  especialidades: { nombre: string } | null;
-  medicos: { nombre_completo: string } | null;
-};
+  id: string
+  fecha_hora: string
+  estado: string
+  enlace_zoom: string | null
+  especialidades: { nombre: string } | null
+  medicos: { nombre_completo: string } | null
+}
+
+// Colores para cada estado de cita
+function badgeEstado(estado: string) {
+  switch (estado) {
+    case 'confirmada':
+      return 'bg-green-100 text-green-700'
+    case 'pendiente_pago':
+      return 'bg-yellow-100 text-yellow-700'
+    case 'cancelada':
+      return 'bg-red-100 text-red-600'
+    case 'en_curso':
+      return 'bg-blue-100 text-blue-700'
+    case 'finalizada':
+      return 'bg-gray-100 text-gray-600'
+    case 'agendada':
+      return 'bg-purple-100 text-purple-700'
+    default:
+      return 'bg-secondary/10 text-secondary'
+  }
+}
+
+function etiquetaEstado(estado: string) {
+  switch (estado) {
+    case 'pendiente_pago': return 'Pendiente de Pago'
+    case 'confirmada': return 'Confirmada'
+    case 'cancelada': return 'Cancelada'
+    case 'en_curso': return 'En Curso'
+    case 'finalizada': return 'Finalizada'
+    case 'agendada': return 'Agendada'
+    default: return estado
+  }
+}
 
 export default async function MisCitasPage() {
   const { error, status } = await verificarUsuario(['paciente'])
-  
+
   if (error) {
     if (status === 401) redirect('/login')
     return (
@@ -25,27 +58,29 @@ export default async function MisCitasPage() {
     )
   }
 
+  // Expiración perezosa antes de consultar
+  await expirarPagosPendientes()
+
   const supabase = await createClient()
 
   const { data, error: dbError } = await supabase
     .from('citas')
     .select(`
-      id, 
-      fecha_hora, 
-      estado, 
+      id,
+      fecha_hora,
+      estado,
       enlace_zoom,
       especialidades(nombre),
       medicos(nombre_completo)
     `)
     .order('fecha_hora', { ascending: false })
 
-  // Transformar de forma segura al tipo CitaRespuesta
-  const citas = data as unknown as CitaRespuesta[] | null;
+  const citas = data as unknown as CitaRespuesta[] | null
 
   return (
     <main className="flex flex-col p-6 max-w-5xl mx-auto w-full">
       <h1 className="text-3xl font-bold text-primary mb-8">Mis Videoconsultas</h1>
-      
+
       {dbError ? (
         <div className="bg-red-50 text-red-600 p-4 rounded-md">Error al cargar las citas: {dbError.message}</div>
       ) : !citas || citas.length === 0 ? (
@@ -57,26 +92,40 @@ export default async function MisCitasPage() {
           {citas.map((cita) => (
             <div key={cita.id} className="bg-white dark:bg-black/20 p-6 rounded-xl shadow-sm border border-foreground/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h3 className="font-bold text-lg">{cita.especialidades?.nombre || 'Especialidad'} - Dr(a). {cita.medicos?.nombre_completo || 'No asignado'}</h3>
+                <h3 className="font-bold text-lg">
+                  {cita.especialidades?.nombre || 'Especialidad'} - Dr(a). {cita.medicos?.nombre_completo || 'No asignado'}
+                </h3>
                 <p className="text-foreground/70">{new Date(cita.fecha_hora).toLocaleString('es-EC')}</p>
                 <div className="mt-2 text-sm">
-                  Estado: <span className="font-semibold px-2 py-1 bg-secondary/10 text-secondary rounded-md uppercase text-xs tracking-wider">{cita.estado}</span>
+                  <span className={`font-semibold px-2 py-1 rounded-md uppercase text-xs tracking-wider ${badgeEstado(cita.estado)}`}>
+                    {etiquetaEstado(cita.estado)}
+                  </span>
                 </div>
               </div>
-              {cita.enlace_zoom && cita.estado === 'confirmada' && (
-                <a 
-                  href={cita.enlace_zoom} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="bg-primary text-white px-6 py-2 rounded-md font-bold hover:bg-primary/90 transition-colors"
-                >
-                  Conectarse a Zoom
-                </a>
-              )}
+              <div className="flex gap-2">
+                {cita.estado === 'pendiente_pago' && (
+                  <Link
+                    href={`/pago?cita=${cita.id}`}
+                    className="bg-yellow-500 text-white px-5 py-2 rounded-md font-bold hover:bg-yellow-600 transition-colors text-sm"
+                  >
+                    Pagar ahora
+                  </Link>
+                )}
+                {cita.enlace_zoom && cita.estado === 'confirmada' && (
+                  <a
+                    href={cita.enlace_zoom}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-primary text-white px-5 py-2 rounded-md font-bold hover:bg-primary/90 transition-colors text-sm"
+                  >
+                    Conectarse a Zoom
+                  </a>
+                )}
+              </div>
             </div>
           ))}
         </div>
       )}
     </main>
-  );
+  )
 }
