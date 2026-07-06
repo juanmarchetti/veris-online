@@ -36,17 +36,10 @@ export async function crearCita(formData: FormData) {
     return { error: 'Todos los campos obligatorios deben ser completados.' }
   }
 
-  const [hStr, mStr] = hora.split(':')
-  const hour = parseInt(hStr, 10)
-  const minutes = parseInt(mStr, 10)
+  const { validarHoraCita, validarDiaCita, validarFechaFutura } = await import('@/utils/validaciones-cita')
 
-  if (hour < 8 || (hour === 17 && minutes > 30) || hour > 17) {
-    return { error: 'La hora seleccionada está fuera del horario de atención (08:00 a 17:30).' }
-  }
-
-  if (minutes !== 0 && minutes !== 30) {
-    return { error: 'Las citas deben agendarse en bloques de 30 minutos (ej. 08:00, 08:30).' }
-  }
+  const errorHora = validarHoraCita(hora)
+  if (errorHora) return { error: errorHora }
 
   // Construir fecha_hora en formato ISO
   const fecha_hora = new Date(`${fecha}T${hora}:00`)
@@ -55,14 +48,11 @@ export async function crearCita(formData: FormData) {
     return { error: 'La fecha u hora seleccionada no es válida.' }
   }
 
-  if (fecha_hora <= new Date()) {
-    return { error: 'No puedes agendar una cita en el pasado.' }
-  }
+  const errorFutura = validarFechaFutura(fecha_hora)
+  if (errorFutura) return { error: errorFutura }
 
-  // Verificar que no sea domingo (0 = domingo)
-  if (fecha_hora.getDay() === 0) {
-    return { error: 'No se pueden agendar citas en domingo.' }
-  }
+  const errorDia = validarDiaCita(fecha_hora)
+  if (errorDia) return { error: errorDia }
 
   // Extraer precio base de la especialidad
   const { data: especialidad, error: espError } = await supabase

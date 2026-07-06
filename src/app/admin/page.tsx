@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import GestionUsuarios, { type UsuarioConRol } from './GestionUsuarios'
+import GestionCatalogos from './GestionCatalogos'
 
 export default async function AdminPage() {
   const { error, status } = await verificarUsuario(['admin'])
@@ -46,10 +47,14 @@ export default async function AdminPage() {
     { data: authUsersData },
     { data: perfiles },
     { data: especialidades },
+    { data: conveniosData },
+    { data: especialidadesConPrecio },
   ] = await Promise.all([
     adminClient.auth.admin.listUsers({ perPage: 200 }),
     adminClient.from('perfiles').select('id, rol'),
     adminClient.from('especialidades').select('id, nombre').order('nombre'),
+    adminClient.from('convenios').select('id, nombre_aseguradora').order('nombre_aseguradora'),
+    adminClient.from('especialidades').select('id, nombre, precio_base').order('nombre'),
   ])
 
   // Combinar datos de auth.users con el rol de perfiles
@@ -92,6 +97,13 @@ export default async function AdminPage() {
       <GestionUsuarios
         usuarios={usuarios}
         especialidades={especialidades ?? []}
+      />
+
+      {/* Tarea 9: Gestión de catálogos — CRUD de especialidades y convenios */}
+      <hr className="my-10 border-foreground/10" />
+      <GestionCatalogos
+        especialidades={(especialidadesConPrecio ?? []).map((e: { id: string; nombre: string; precio_base: number | null }) => ({ ...e, precio_base: e.precio_base ?? 25.00 }))}
+        convenios={conveniosData ?? []}
       />
     </main>
   );
