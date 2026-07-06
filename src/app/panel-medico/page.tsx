@@ -10,6 +10,7 @@
 import { verificarUsuario } from '@/utils/auth'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import AccionesCitaMedico from './AccionesCitaMedico'
 
 // Forzar renderizado dinámico: esta página requiere cookies de sesión en cada request.
 // Sin esto, Next.js intentaría pre-renderizar estáticamente y fallaría sin env vars.
@@ -174,6 +175,11 @@ export default async function PanelMedicoPage() {
                   Unirse a Zoom
                 </a>
               )}
+              
+              {/* Acciones del Médico: en curso, finalizar, documentos */}
+              <div className="w-full sm:w-auto">
+                <AccionesCitaMedico idCita={cita.id} estado={cita.estado} />
+              </div>
             </div>
           ))}
         </div>

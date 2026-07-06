@@ -9,6 +9,7 @@ type CitaRespuesta = {
   fecha_hora: string
   estado: string
   enlace_zoom: string | null
+  requiere_valoracion_presencial: boolean
   especialidades: { nombre: string } | null
   medicos: { nombre_completo: string } | null
 }
@@ -70,6 +71,7 @@ export default async function MisCitasPage() {
       fecha_hora,
       estado,
       enlace_zoom,
+      requiere_valoracion_presencial,
       especialidades(nombre),
       medicos(nombre_completo)
     `)
@@ -79,7 +81,15 @@ export default async function MisCitasPage() {
 
   return (
     <main className="flex flex-col p-6 max-w-5xl mx-auto w-full">
-      <h1 className="text-3xl font-bold text-primary mb-8">Mis Videoconsultas</h1>
+      <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
+        <h1 className="text-3xl font-bold text-primary">Mis Videoconsultas</h1>
+        <Link 
+          href="/mis-citas/historial" 
+          className="bg-secondary/10 text-secondary hover:bg-secondary/20 px-4 py-2 rounded-md font-semibold text-sm transition-colors"
+        >
+          Ver Historial Clínico
+        </Link>
+      </div>
 
       {dbError ? (
         <div className="bg-red-50 text-red-600 p-4 rounded-md">Error al cargar las citas: {dbError.message}</div>
@@ -96,10 +106,17 @@ export default async function MisCitasPage() {
                   {cita.especialidades?.nombre || 'Especialidad'} - Dr(a). {cita.medicos?.nombre_completo || 'No asignado'}
                 </h3>
                 <p className="text-foreground/70">{new Date(cita.fecha_hora).toLocaleString('es-EC')}</p>
-                <div className="mt-2 text-sm">
-                  <span className={`font-semibold px-2 py-1 rounded-md uppercase text-xs tracking-wider ${badgeEstado(cita.estado)}`}>
-                    {etiquetaEstado(cita.estado)}
-                  </span>
+                <div className="mt-2 flex flex-col gap-2 text-sm">
+                  <div>
+                    <span className={`font-semibold px-2 py-1 rounded-md uppercase text-xs tracking-wider ${badgeEstado(cita.estado)}`}>
+                      {etiquetaEstado(cita.estado)}
+                    </span>
+                  </div>
+                  {cita.requiere_valoracion_presencial && (
+                    <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-2 rounded-md border border-red-200 dark:border-red-800 text-xs mt-1">
+                      ⚠️ <strong>Atención:</strong> Sus síntomas persisten o requieren valoración presencial. Por favor acuda a la clínica más cercana.
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex gap-2">
