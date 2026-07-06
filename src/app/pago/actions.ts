@@ -12,29 +12,13 @@ export async function simularPagoAprobado(idCita: string) {
     return { error: 'No autorizado.' }
   }
 
-  // Actualizar pago → aprobado
-  const { error: pagoError } = await supabase
-    .from('pagos')
-    .update({
-      estado_pago: 'aprobado',
-      fecha_pago: new Date().toISOString(),
-      metodo_pago: 'simulado'
-    })
-    .eq('id_cita', idCita)
-    .eq('estado_pago', 'pendiente')
+  // Llamar a la RPC SECURITY DEFINER para aprobar pago y confirmar cita atómicamente
+  const { error: rpcError } = await supabase.rpc('aprobar_pago_simulado', {
+    p_id_cita: idCita
+  })
 
-  if (pagoError) {
-    return { error: 'Error al procesar el pago: ' + pagoError.message }
-  }
-
-  // Actualizar cita → confirmada
-  const { error: citaError } = await supabase
-    .from('citas')
-    .update({ estado: 'confirmada' })
-    .eq('id', idCita)
-
-  if (citaError) {
-    return { error: 'Pago procesado pero error al confirmar la cita: ' + citaError.message }
+  if (rpcError) {
+    return { error: 'Error al procesar el pago: ' + rpcError.message }
   }
 
   revalidatePath('/mis-citas')

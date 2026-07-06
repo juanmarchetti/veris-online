@@ -5,6 +5,16 @@ import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+// Fix #1: Mapeo de rutas de destino por rol para redirección post-login.
+// Antes: siempre se redirigía a /agendar-cita, rompiendo el acceso de médicos,
+// admins y agentes CC que caían en una página exclusiva de pacientes.
+const RUTA_POR_ROL: Record<string, string> = {
+  paciente: '/agendar-cita',
+  medico: '/panel-medico',
+  agente_cc: '/panel-cc',
+  admin: '/admin',
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -35,41 +45,59 @@ export default function LoginPage() {
         throw new Error('Credenciales inválidas. Verifica tu correo y contraseña.');
       }
 
-      // Check if user is fully loaded and if they are a patient missing their row
       if (authData.user) {
-        // Obtenemos el registro de pacientes para asegurar que exista
-        const { error: fetchError } = await supabase
-          .from('pacientes')
-          .select('id')
-          .eq('id_auth_user', authData.user.id)
+        // Fix #1 y #5: Consultar el rol real del usuario desde perfiles ANTES de cualquier
+        // lógica adicional. Determina tanto la redirección correcta como si se debe
+        // auto-crear la fila en pacientes (solo para rol === 'paciente').
+        const { data: perfil } = await supabase
+          .from('perfiles')
+          .select('rol')
+          .eq('id', authData.user.id)
           .single();
 
-        if (fetchError && fetchError.code === 'PGRST116') {
-          // No existe la fila. Probablemente hubo confirmación de correo o un error de RLS en el signUp.
-          // Recuperamos los metadatos de usuario guardados en signUp.
-          const { user_metadata } = authData.user;
-          if (user_metadata?.nombre_completo) {
-            const { error: insertError } = await supabase.from('pacientes').insert({
-              id_auth_user: authData.user.id,
-              tipo_identificacion: user_metadata.tipo_identificacion || 'CEDULA',
-              numero_identificacion: user_metadata.numero_identificacion || '0000000000',
-              nombre_completo: user_metadata.nombre_completo,
-              correo: authData.user.email,
-              telefono: user_metadata.telefono || '',
-              cuenta_registrada_portal: true,
-              historial_clinico_veris: false
-            });
+        const rol = perfil?.rol as string | undefined;
 
-            if (insertError) {
-              console.error('Error auto-creando paciente tras login:', insertError);
-              throw new Error('No se pudo completar el registro de tu perfil de paciente. Contacta a soporte.');
+        // Fix #5: Solo intentar auto-crear fila en pacientes si el rol real es 'paciente'.
+        // Médicos, admins y agentes CC no deben tener fila en la tabla pacientes.
+        // Antes no se verificaba el rol, pudiendo insertar una fila errónea si un médico
+        // iniciaba sesión con nombre_completo en sus metadatos de registro.
+        if (rol === 'paciente') {
+          const { error: fetchError } = await supabase
+            .from('pacientes')
+            .select('id')
+            .eq('id_auth_user', authData.user.id)
+            .single();
+
+          if (fetchError && fetchError.code === 'PGRST116') {
+            // No existe la fila de paciente. Probablemente hubo confirmación de correo
+            // o un error de RLS en el signUp original. Recuperamos los metadatos guardados.
+            const { user_metadata } = authData.user;
+            if (user_metadata?.nombre_completo) {
+              const { error: insertError } = await supabase.from('pacientes').insert({
+                id_auth_user: authData.user.id,
+                tipo_identificacion: user_metadata.tipo_identificacion || 'CEDULA',
+                numero_identificacion: user_metadata.numero_identificacion || '0000000000',
+                nombre_completo: user_metadata.nombre_completo,
+                correo: authData.user.email,
+                telefono: user_metadata.telefono || '',
+                cuenta_registrada_portal: true,
+                historial_clinico_veris: false
+              });
+
+              if (insertError) {
+                console.error('Error auto-creando paciente tras login:', insertError);
+                throw new Error('No se pudo completar el registro de tu perfil de paciente. Contacta a soporte.');
+              }
             }
           }
         }
-      }
 
-      router.push('/agendar-cita');
-      router.refresh();
+        // Fix #1: Redirigir al panel correspondiente según el rol real del usuario.
+        // Si el perfil no existe por algún error de BD, se cae al default paciente.
+        const rutaDestino = rol ? (RUTA_POR_ROL[rol] ?? '/agendar-cita') : '/agendar-cita';
+        router.push(rutaDestino);
+        router.refresh();
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

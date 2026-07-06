@@ -3,8 +3,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 
-// Monto placeholder de tarifa de videoconsulta — reemplazar con tarifa real por especialidad/convenio
-const MONTO_CONSULTA = 25.00
 
 export async function crearCita(formData: FormData) {
   const supabase = await createClient()
@@ -38,6 +36,18 @@ export async function crearCita(formData: FormData) {
     return { error: 'Todos los campos obligatorios deben ser completados.' }
   }
 
+  const [hStr, mStr] = hora.split(':')
+  const hour = parseInt(hStr, 10)
+  const minutes = parseInt(mStr, 10)
+
+  if (hour < 8 || (hour === 17 && minutes > 30) || hour > 17) {
+    return { error: 'La hora seleccionada está fuera del horario de atención (08:00 a 17:30).' }
+  }
+
+  if (minutes !== 0 && minutes !== 30) {
+    return { error: 'Las citas deben agendarse en bloques de 30 minutos (ej. 08:00, 08:30).' }
+  }
+
   // Construir fecha_hora en formato ISO
   const fecha_hora = new Date(`${fecha}T${hora}:00`)
 
@@ -53,6 +63,18 @@ export async function crearCita(formData: FormData) {
   if (fecha_hora.getDay() === 0) {
     return { error: 'No se pueden agendar citas en domingo.' }
   }
+
+  // Extraer precio base de la especialidad
+  const { data: especialidad, error: espError } = await supabase
+    .from('especialidades')
+    .select('precio_base')
+    .eq('id', id_especialidad)
+    .single()
+
+  if (espError || !especialidad) {
+    return { error: 'Especialidad no encontrada.' }
+  }
+  const montoConsulta = especialidad.precio_base || 25.00
 
   // 4. Insertar cita
   const { data: cita, error: citaError } = await supabase
@@ -84,7 +106,7 @@ export async function crearCita(formData: FormData) {
     .from('pagos')
     .insert({
       id_cita: cita.id,
-      monto: MONTO_CONSULTA,
+      monto: montoConsulta,
       fecha_limite_pago: fechaLimite.toISOString(),
       estado_pago: 'pendiente'
     })

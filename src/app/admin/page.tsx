@@ -1,6 +1,14 @@
+// Fix #3 y #4: Panel de Administración ampliado con gestión de usuarios y roles.
+// Mantiene las estadísticas originales intactas y agrega la sección de usuarios debajo.
+
+// Forzar renderizado dinámico: página autenticada que usa admin client con service_role.
+export const dynamic = 'force-dynamic'
+
 import { verificarUsuario } from '@/utils/auth'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
+import GestionUsuarios, { type UsuarioConRol } from './GestionUsuarios'
 
 export default async function AdminPage() {
   const { error, status } = await verificarUsuario(['admin'])
@@ -28,10 +36,38 @@ export default async function AdminPage() {
     supabase.from('citas').select('*', { count: 'exact', head: true })
   ])
 
+  // Fix #3: Obtener lista de todos los usuarios para la sección de gestión.
+  // Usamos createAdminClient() (service_role key) para:
+  //   a) Acceder a auth.admin.listUsers() y obtener los emails de auth.users
+  //   b) Leer todos los perfiles (bypassando RLS, que solo permite leer el propio)
+  const adminClient = createAdminClient()
+
+  const [
+    { data: authUsersData },
+    { data: perfiles },
+    { data: especialidades },
+  ] = await Promise.all([
+    adminClient.auth.admin.listUsers({ perPage: 200 }),
+    adminClient.from('perfiles').select('id, rol'),
+    adminClient.from('especialidades').select('id, nombre').order('nombre'),
+  ])
+
+  // Combinar datos de auth.users con el rol de perfiles
+  const perfilMap = new Map<string, string>(
+    perfiles?.map((p: { id: string; rol: string }) => [p.id, p.rol]) ?? []
+  )
+
+  const usuarios: UsuarioConRol[] = (authUsersData?.users ?? []).map((u) => ({
+    id: u.id,
+    email: u.email ?? 'Sin correo',
+    rol: perfilMap.get(u.id) ?? 'paciente',
+  }))
+
   return (
     <main className="flex flex-col p-6 max-w-5xl mx-auto w-full">
       <h1 className="text-3xl font-bold text-primary mb-8">Panel de Administración</h1>
       
+      {/* Estadísticas — sin cambios respecto al original */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-white dark:bg-black/20 p-6 rounded-xl shadow-sm border border-foreground/10 text-center">
           <p className="text-foreground/60 text-sm font-semibold uppercase tracking-wider mb-2">Total Pacientes</p>
@@ -48,12 +84,15 @@ export default async function AdminPage() {
           <p className="text-5xl font-extrabold text-foreground">{totalCitas ?? 0}</p>
         </div>
       </div>
-      
-      <div className="mt-12 bg-surface border border-foreground/10 p-8 rounded-xl text-center">
-        <p className="text-foreground/70">
-          La gestión avanzada de catálogos y reportes estará disponible próximamente.
-        </p>
-      </div>
+
+      {/* Divisor */}
+      <hr className="my-10 border-foreground/10" />
+
+      {/* Fix #3 y #4: Gestión de usuarios — cambio de roles y creación de perfil médico */}
+      <GestionUsuarios
+        usuarios={usuarios}
+        especialidades={especialidades ?? []}
+      />
     </main>
   );
 }
