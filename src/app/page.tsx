@@ -1,63 +1,80 @@
-import Image from "next/image";
+import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
+      {/* Navegación */}
+      <nav className="w-full p-6 flex justify-between items-center max-w-7xl mx-auto">
+        <div className="text-2xl font-bold tracking-tighter text-primary">
+          Veris <span className="text-secondary">Online</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <div className="flex gap-4">
+          <Link 
+            href="/login" 
+            className="px-5 py-2.5 text-sm font-medium rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Iniciar Sesión
+          </Link>
+          <Link 
+            href="/registro" 
+            className="px-5 py-2.5 text-sm font-medium rounded-full bg-primary text-white hover:bg-primary-container transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
           >
-            Documentation
-          </a>
+            Registrarse
+          </Link>
+        </div>
+      </nav>
+
+      {/* Sección Principal (Hero) */}
+      <main className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 mt-12 mb-24 relative">
+        
+        {/* Elementos decorativos de fondo (Glassmorphism / Glow) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] bg-primary/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] bg-secondary/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-semibold mb-8 animate-pulse">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+          </span>
+          Atención médica desde cualquier lugar
+        </div>
+
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight max-w-4xl mb-6 leading-[1.1]">
+          Tu salud, a una <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">videoconsulta</span> de distancia
+        </h1>
+        
+        <p className="text-xl sm:text-2xl text-foreground/70 max-w-2xl mb-12 font-light leading-relaxed">
+          Conéctate con los mejores especialistas de Veris sin salir de casa. Rápido, seguro y sin complicaciones.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <Link
+            href="/agendar-cita"
+            className="px-8 py-4 text-lg font-medium rounded-full bg-primary text-white hover:bg-primary-container transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-primary/20 transform hover:-translate-y-1 w-full sm:w-auto flex items-center justify-center gap-2"
+          >
+            Agendar Videoconsulta
+          </Link>
+          <Link
+            href="/login"
+            className="px-8 py-4 text-lg font-medium rounded-full bg-surface border border-primary/20 text-primary hover:bg-primary/5 transition-all duration-300 w-full sm:w-auto shadow-sm hover:shadow-md flex items-center justify-center"
+          >
+            Ya tengo una cuenta
+          </Link>
+        </div>
+        
+        {/* Estadísticas / Confianza */}
+        <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 pt-10 border-t border-foreground/10 max-w-4xl w-full">
+          {[
+            { label: 'Especialidades', value: '30+' },
+            { label: 'Médicos Activos', value: '500+' },
+            { label: 'Pacientes Satisfechos', value: '1M+' },
+            { label: 'Disponibilidad', value: '24/7' },
+          ].map((stat, i) => (
+            <div key={i} className="flex flex-col items-center transition-transform hover:scale-105 duration-300">
+              <span className="text-3xl font-extrabold text-foreground mb-1">{stat.value}</span>
+              <span className="text-xs font-bold text-foreground/50 uppercase tracking-widest">{stat.label}</span>
+            </div>
+          ))}
         </div>
       </main>
     </div>
