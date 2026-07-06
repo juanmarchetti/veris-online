@@ -2,28 +2,7 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
-      {/* Navegación */}
-      <nav className="w-full p-6 flex justify-between items-center max-w-7xl mx-auto">
-        <div className="text-2xl font-bold tracking-tighter text-primary">
-          Veris <span className="text-secondary">Online</span>
-        </div>
-        <div className="flex gap-4">
-          <Link 
-            href="/login" 
-            className="px-5 py-2.5 text-sm font-medium rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-          >
-            Iniciar Sesión
-          </Link>
-          <Link 
-            href="/registro" 
-            className="px-5 py-2.5 text-sm font-medium rounded-full bg-primary text-white hover:bg-primary-container transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-          >
-            Registrarse
-          </Link>
-        </div>
-      </nav>
-
+    <div className="flex flex-col bg-background text-foreground overflow-x-hidden">
       {/* Sección Principal (Hero) */}
       <main className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 mt-12 mb-24 relative">
         
