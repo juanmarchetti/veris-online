@@ -6,15 +6,17 @@ export async function GET() {
   try {
     const supabase = await createClient()
     
-    // Test the database connection using a simple query
-    const { error } = await supabase.from('pg_catalog.pg_tables').select('*').limit(1)
+    // Test the database connection using auth.getSession()
+    const { error } = await supabase.auth.getSession()
 
     if (error) {
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
+      console.error('Supabase connection error:', error)
+      return NextResponse.json({ ok: false, error: 'Internal Server Error' }, { status: 500 })
     }
 
     return NextResponse.json({ ok: true, timestamp: new Date().toISOString() })
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message || 'Unknown error' }, { status: 500 })
+  } catch (error: unknown) {
+    console.error('Health check exception:', error instanceof Error ? error.message : String(error))
+    return NextResponse.json({ ok: false, error: 'Internal Server Error' }, { status: 500 })
   }
 }

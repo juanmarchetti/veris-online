@@ -1,5 +1,4 @@
 import { createClient } from './supabase/server'
-import { NextResponse } from 'next/server'
 
 type Role = 'paciente' | 'medico' | 'agente_cc' | 'admin'
 
