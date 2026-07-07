@@ -43,9 +43,19 @@ export default function RegistroPage() {
       });
 
       if (authError) {
-        if (authError.message.includes('already registered')) throw new Error('El correo ya está registrado.');
-        if (authError.message.includes('Password should be at least')) throw new Error('La contraseña es demasiado débil (mínimo 6 caracteres).');
-        throw new Error(authError.message);
+        console.error('Supabase Auth Error:', authError);
+        
+        const msg = authError.message || '';
+        if (msg.includes('already registered')) {
+          throw new Error('El correo ya está registrado.');
+        }
+        if (msg.includes('Password should be at least')) {
+          throw new Error('La contraseña es demasiado débil (mínimo 6 caracteres).');
+        }
+        if (msg === '{}' || msg.trim() === '') {
+          throw new Error('Ocurrió un error inesperado al intentar registrarte (Servidor devolvió respuesta vacía). Por favor, intenta de nuevo.');
+        }
+        throw new Error(msg);
       }
 
       if (!authData.user) {
