@@ -11,6 +11,7 @@ export default function LogoutButton() {
   const handleLogout = async () => {
     setLoading(true);
     await supabase.auth.signOut();
+    router.push('/login');
     router.refresh();
     setLoading(false);
   };
@@ -19,9 +20,22 @@ export default function LogoutButton() {
     <button
       onClick={handleLogout}
       disabled={loading}
-      className="text-sm font-medium text-red-500 hover:text-red-700 hover:bg-red-50 px-4 py-2 rounded-md transition-colors disabled:opacity-50 cursor-pointer"
+      style={{
+        fontSize: '14px',
+        fontWeight: 500,
+        color: 'var(--error)',
+        background: 'transparent',
+        border: 'none',
+        padding: '0.4rem 0.75rem',
+        borderRadius: '0.375rem',
+        cursor: loading ? 'not-allowed' : 'pointer',
+        opacity: loading ? 0.6 : 1,
+        transition: 'background 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = '#fef2f2')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
     >
-      {loading ? 'Saliendo...' : 'Cerrar Sesión'}
+      {loading ? 'Saliendo…' : 'Cerrar Sesión'}
     </button>
   );
 }

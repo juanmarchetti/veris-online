@@ -1,5 +1,9 @@
 'use client';
 
+// SRS RF-01.3 [FUENTE]: Registro de paciente nuevo en el portal.
+// Recolecta: tipo/número de identificación, nombre, correo, teléfono, contraseña.
+// Diseño Stitch: "Crea tu cuenta" — Clinical Minimalist.
+
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -11,6 +15,8 @@ export default function RegistroPage() {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,50 +31,38 @@ export default function RegistroPage() {
     const correo = formData.get('correo') as string;
     const telefono = formData.get('telefono') as string;
     const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+
+    if (password !== confirmPassword) {
+      setError('Las contraseñas no coinciden.');
+      setLoading(false);
+      return;
+    }
 
     try {
-      // 1. Crear usuario en Auth, inyectando los datos como metadatos por seguridad 
-      // en caso de que requiera confirmación de correo.
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: correo,
         password,
         options: {
-          data: {
-            tipo_identificacion,
-            numero_identificacion,
-            nombre_completo,
-            telefono
-          }
+          data: { tipo_identificacion, numero_identificacion, nombre_completo, telefono }
         }
       });
 
       if (authError) {
-        console.error('Supabase Auth Error:', authError);
-        
         const msg = authError.message || '';
-        if (msg.includes('already registered')) {
-          throw new Error('El correo ya está registrado.');
-        }
-        if (msg.includes('Password should be at least')) {
-          throw new Error('La contraseña es demasiado débil (mínimo 6 caracteres).');
-        }
-        if (msg === '{}' || msg.trim() === '') {
-          throw new Error('Ocurrió un error inesperado al intentar registrarte (Servidor devolvió respuesta vacía). Por favor, intenta de nuevo.');
-        }
+        if (msg.includes('already registered')) throw new Error('El correo ya está registrado.');
+        if (msg.includes('Password should be at least')) throw new Error('La contraseña es demasiado débil (mínimo 6 caracteres).');
+        if (msg === '{}' || msg.trim() === '') throw new Error('Error inesperado al registrarte. Intenta de nuevo.');
         throw new Error(msg);
       }
 
-      if (!authData.user) {
-        throw new Error('No se pudo crear el usuario.');
-      }
+      if (!authData.user) throw new Error('No se pudo crear el usuario.');
 
-      // Verificamos si Supabase exige confirmación de correo (en cuyo caso no hay sesión aún)
       if (!authData.session) {
-        setSuccessMsg('Tu cuenta ha sido creada exitosamente. Por favor, revisa tu bandeja de entrada y confirma tu correo electrónico antes de iniciar sesión. Tus datos se guardarán automáticamente en tu primer ingreso.');
+        setSuccessMsg('¡Cuenta creada! Revisa tu correo electrónico para confirmar tu cuenta antes de iniciar sesión.');
         return;
       }
 
-      // 2. Insertar en tabla pacientes de inmediato porque SÍ hay sesión
       const { error: dbError } = await supabase.from('pacientes').insert({
         id_auth_user: authData.user.id,
         tipo_identificacion,
@@ -81,79 +75,166 @@ export default function RegistroPage() {
       });
 
       if (dbError) {
-        setError(`Tu cuenta ha sido creada, pero hubo un problema al guardar tus datos de paciente (Error: ${dbError.message}). Por favor contacta a soporte o intenta iniciar sesión para completar tu registro.`);
+        setError(`Tu cuenta fue creada, pero hubo un problema al guardar tus datos (${dbError.message}). Contacta a soporte.`);
         return;
       }
 
       router.push('/agendar-cita');
       router.refresh();
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Error inesperado.');
-      }
+      setError(err instanceof Error ? err.message : 'Error inesperado.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="flex min-h-[80vh] flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white dark:bg-black/20 p-8 rounded-xl shadow-lg border border-foreground/5">
-        <h1 className="text-3xl font-bold text-primary mb-6 text-center">Registro de Paciente</h1>
-        
-        {error && <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6 text-sm">{error}</div>}
-        {successMsg && <div className="bg-green-50 text-green-700 p-4 rounded-md mb-6 text-sm">{successMsg}</div>}
+    <main
+      style={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem 1rem',
+        minHeight: '70vh',
+        background: 'var(--background)',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '480px',
+          background: 'var(--surface-container-lowest)',
+          borderRadius: '0.75rem',
+          borderTop: '4px solid var(--primary-container)',
+          boxShadow: '0 4px 24px rgba(30, 41, 59, 0.08)',
+          padding: '2.5rem',
+        }}
+      >
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h1 style={{ fontSize: '26px', fontWeight: 700, color: 'var(--primary-container)', margin: '0 0 0.5rem' }}>
+            Crea tu cuenta
+          </h1>
+          <p style={{ fontSize: '14px', color: 'var(--on-surface-variant)' }}>
+            Completa tus datos para empezar a cuidar tu salud
+          </p>
+        </div>
+
+        {/* Messages */}
+        {error && <div className="alert-error" style={{ marginBottom: '1.25rem' }}>{error}</div>}
+        {successMsg && (
+          <div className="alert-success" style={{ marginBottom: '1.25rem' }}>
+            {successMsg}
+            <div style={{ marginTop: '0.75rem' }}>
+              <Link href="/login" style={{ fontWeight: 600, color: 'var(--primary-container)' }}>Ir al inicio de sesión →</Link>
+            </div>
+          </div>
+        )}
 
         {!successMsg && (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-1 block">Tipo ID</label>
-                <select name="tipo_identificacion" required className="w-full p-2 border rounded-md bg-white dark:bg-black">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* Identificación */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.75rem' }}>
+              <div>
+                <label htmlFor="tipo_identificacion" className="input-label">Tipo de ID</label>
+                <select id="tipo_identificacion" name="tipo_identificacion" required className="input-field">
                   <option value="CEDULA">Cédula</option>
                   <option value="PASAPORTE">Pasaporte</option>
+                  <option value="RUC">RUC</option>
                 </select>
               </div>
-              <div className="flex-[2]">
-                <label className="text-sm font-medium mb-1 block">Número de ID</label>
-                <input type="text" name="numero_identificacion" required className="w-full p-2 border rounded-md bg-white dark:bg-black" />
+              <div>
+                <label htmlFor="numero_identificacion" className="input-label">Número de ID</label>
+                <input id="numero_identificacion" type="text" name="numero_identificacion" required placeholder="0912345678" className="input-field" />
               </div>
             </div>
 
+            {/* Nombre */}
             <div>
-              <label className="text-sm font-medium mb-1 block">Nombre Completo</label>
-              <input type="text" name="nombre_completo" required className="w-full p-2 border rounded-md bg-white dark:bg-black" />
+              <label htmlFor="nombre_completo" className="input-label">Nombres y Apellidos</label>
+              <input id="nombre_completo" type="text" name="nombre_completo" required placeholder="Ej. Juan Pérez" className="input-field" />
             </div>
 
+            {/* Correo */}
             <div>
-              <label className="text-sm font-medium mb-1 block">Correo Electrónico</label>
-              <input type="email" name="correo" required className="w-full p-2 border rounded-md bg-white dark:bg-black" />
+              <label htmlFor="correo" className="input-label">Correo electrónico</label>
+              <input id="correo" type="email" name="correo" required placeholder="tu@email.com" className="input-field" />
             </div>
 
+            {/* Teléfono */}
             <div>
-              <label className="text-sm font-medium mb-1 block">Teléfono (opcional)</label>
-              <input type="tel" name="telefono" className="w-full p-2 border rounded-md bg-white dark:bg-black" />
+              <label htmlFor="telefono" className="input-label">Número de celular</label>
+              <input id="telefono" type="tel" name="telefono" placeholder="0912345678" className="input-field" />
             </div>
 
+            {/* Contraseña */}
             <div>
-              <label className="text-sm font-medium mb-1 block">Contraseña</label>
-              <input type="password" name="password" required minLength={6} className="w-full p-2 border rounded-md bg-white dark:bg-black" />
+              <label htmlFor="password" className="input-label">Contraseña</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  required
+                  minLength={6}
+                  placeholder="••••••••"
+                  className="input-field"
+                  style={{ paddingRight: '3rem' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--outline)', padding: '0.25rem' }}
+                  aria-label="Mostrar/ocultar contraseña"
+                >
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
             </div>
 
-            <button 
-              type="submit" 
+            {/* Confirmar contraseña */}
+            <div>
+              <label htmlFor="confirmPassword" className="input-label">Confirmar contraseña</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="confirmPassword"
+                  type={showConfirm ? 'text' : 'password'}
+                  name="confirmPassword"
+                  required
+                  minLength={6}
+                  placeholder="••••••••"
+                  className="input-field"
+                  style={{ paddingRight: '3rem' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(v => !v)}
+                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--outline)', padding: '0.25rem' }}
+                  aria-label="Mostrar/ocultar confirmar contraseña"
+                >
+                  {showConfirm ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
               disabled={loading}
-              className="w-full bg-primary text-white p-3 rounded-md font-bold hover:bg-primary/90 transition-colors mt-4 disabled:opacity-50"
+              className="btn-primary"
+              style={{ marginTop: '0.5rem' }}
             >
-              {loading ? 'Registrando...' : 'Registrarse'}
+              {loading ? 'Registrando…' : 'Registrarme'}
             </button>
           </form>
         )}
-        <p className="mt-6 text-center text-sm text-foreground/70">
-          ¿Ya tienes cuenta? <Link href="/login" className="text-primary font-medium hover:underline">Inicia Sesión</Link>
-        </p>
+
+        {/* Login link */}
+        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+          <Link href="/login" style={{ fontSize: '14px', color: 'var(--secondary)', fontWeight: 500, textDecoration: 'none' }}>
+            ¿Ya tienes cuenta? Inicia sesión aquí
+          </Link>
+        </div>
       </div>
     </main>
   );

@@ -1,5 +1,9 @@
 'use client'
 
+// GestionCatalogos — Panel de Admin — Veris Online
+// Gestión de especialidades y convenios/aseguradoras.
+// Diseño Stitch: Clinical Minimalist.
+
 import { useState, useTransition } from 'react'
 import {
   crearEspecialidad,
@@ -21,19 +25,18 @@ export default function GestionCatalogos({
   convenios: Convenio[]
 }) {
   return (
-    <section className="space-y-10">
+    <section style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
       <TablaEspecialidades items={especialidades} />
-      <hr className="border-foreground/10" />
+      <hr style={{ border: 'none', borderTop: '1px solid var(--outline-variant)' }} />
       <TablaConvenios items={convenios} />
     </section>
   )
 }
 
 /* ─── Especialidades ─── */
-
 function TablaEspecialidades({ items }: { items: Especialidad[] }) {
   const [isPending, startTransition] = useTransition()
-  const [msg, setMsg] = useState<string | null>(null)
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [editId, setEditId] = useState<string | null>(null)
 
   const handleCreate = (e: React.FormEvent<HTMLFormElement>) => {
@@ -41,7 +44,7 @@ function TablaEspecialidades({ items }: { items: Especialidad[] }) {
     const fd = new FormData(e.currentTarget)
     startTransition(async () => {
       const res = await crearEspecialidad(fd)
-      setMsg(res.error ?? '✓ Especialidad creada')
+      setMsg(res.error ? { ok: false, text: res.error } : { ok: true, text: '✓ Especialidad creada correctamente.' })
       if (!res.error) (e.target as HTMLFormElement).reset()
     })
   }
@@ -51,82 +54,110 @@ function TablaEspecialidades({ items }: { items: Especialidad[] }) {
     const fd = new FormData(e.currentTarget)
     startTransition(async () => {
       const res = await editarEspecialidad(fd)
-      setMsg(res.error ?? '✓ Especialidad actualizada')
+      setMsg(res.error ? { ok: false, text: res.error } : { ok: true, text: '✓ Especialidad actualizada.' })
       if (!res.error) setEditId(null)
     })
   }
 
   const handleDelete = (id: string) => {
-    if (!confirm('¿Eliminar esta especialidad? Las citas vinculadas impedirán la eliminación.')) return
+    if (!confirm('¿Eliminar esta especialidad? No se puede deshacer.')) return
     startTransition(async () => {
       const res = await eliminarEspecialidad(id)
-      setMsg(res.error ?? '✓ Especialidad eliminada')
+      setMsg(res.error ? { ok: false, text: res.error } : { ok: true, text: '✓ Especialidad eliminada.' })
     })
   }
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">Especialidades</h2>
+      <h2 className="section-title">Especialidades</h2>
 
       {msg && (
-        <div className={`text-sm p-2 rounded mb-4 ${msg.startsWith('✓') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-          {msg}
+        <div className={msg.ok ? 'alert-success' : 'alert-error'} style={{ marginBottom: '1rem' }}>
+          {msg.text}
         </div>
       )}
 
       {/* Formulario de creación */}
-      <form onSubmit={handleCreate} className="flex flex-wrap gap-3 mb-6 items-end">
-        <div className="flex-1 min-w-[180px]">
-          <label className="text-xs font-semibold text-foreground/60 block mb-1">Nombre</label>
-          <input name="nombre" required placeholder="Ej: Cardiología" className="w-full border rounded p-2 text-sm bg-white dark:bg-black" />
+      <form
+        onSubmit={handleCreate}
+        style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'flex-end', marginBottom: '1.5rem' }}
+      >
+        <div style={{ flex: 1, minWidth: '200px' }}>
+          <label className="input-label">Nombre</label>
+          <input
+            name="nombre"
+            required
+            placeholder="Ej: Cardiología"
+            className="input-field"
+          />
         </div>
-        <div className="w-32">
-          <label className="text-xs font-semibold text-foreground/60 block mb-1">Precio Base ($)</label>
-          <input name="precioBase" type="number" step="0.01" min="0" required defaultValue="25.00" className="w-full border rounded p-2 text-sm bg-white dark:bg-black" />
+        <div style={{ width: '140px' }}>
+          <label className="input-label">Precio Base ($)</label>
+          <input
+            name="precioBase"
+            type="number"
+            step="0.01"
+            min="0"
+            required
+            defaultValue="25.00"
+            className="input-field"
+          />
         </div>
-        <button type="submit" disabled={isPending} className="bg-primary text-white px-4 py-2 rounded font-bold text-sm hover:bg-primary/90 disabled:opacity-50">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="btn-primary"
+          style={{ width: 'auto', whiteSpace: 'nowrap' }}
+        >
           Agregar
         </button>
       </form>
 
       {/* Tabla */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
+      <div style={{ overflowX: 'auto', borderRadius: '0.5rem', border: '1px solid var(--outline-variant)' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
           <thead>
-            <tr className="border-b border-foreground/10 text-left">
-              <th className="p-3 font-semibold text-foreground/60">Nombre</th>
-              <th className="p-3 font-semibold text-foreground/60 w-28">Precio Base</th>
-              <th className="p-3 font-semibold text-foreground/60 w-40 text-right">Acciones</th>
+            <tr style={{ background: 'var(--surface-container-low)', borderBottom: '1px solid var(--outline-variant)' }}>
+              <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--on-surface-variant)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Nombre</th>
+              <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--on-surface-variant)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', width: '130px' }}>Precio Base</th>
+              <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontWeight: 600, color: 'var(--on-surface-variant)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', width: '160px' }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={3} style={{ padding: '2rem', textAlign: 'center', color: 'var(--on-surface-variant)', fontSize: '14px' }}>
+                  No hay especialidades registradas.
+                </td>
+              </tr>
+            )}
             {items.map((esp) => (
-              <tr key={esp.id} className="border-b border-foreground/5 hover:bg-foreground/5 transition-colors">
+              <tr
+                key={esp.id}
+                style={{ borderBottom: '1px solid var(--surface-container)', background: 'var(--surface-container-lowest)' }}
+              >
                 {editId === esp.id ? (
-                  <td colSpan={3} className="p-3">
-                    <form onSubmit={handleEdit} className="flex flex-wrap gap-2 items-end">
+                  <td colSpan={3} style={{ padding: '0.75rem 1rem' }}>
+                    <form onSubmit={handleEdit} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
                       <input type="hidden" name="id" value={esp.id} />
-                      <input name="nombre" defaultValue={esp.nombre} required className="flex-1 border rounded p-1 text-sm bg-white dark:bg-black" />
-                      <input name="precioBase" type="number" step="0.01" min="0" defaultValue={esp.precio_base} required className="w-28 border rounded p-1 text-sm bg-white dark:bg-black" />
-                      <button type="submit" disabled={isPending} className="text-primary font-bold text-xs">Guardar</button>
-                      <button type="button" onClick={() => setEditId(null)} className="text-foreground/50 text-xs">Cancelar</button>
+                      <input name="nombre" defaultValue={esp.nombre} required className="input-field" style={{ flex: 1, minWidth: '140px', padding: '0.4rem 0.75rem', fontSize: '14px' }} />
+                      <input name="precioBase" type="number" step="0.01" min="0" defaultValue={esp.precio_base} required className="input-field" style={{ width: '110px', padding: '0.4rem 0.75rem', fontSize: '14px' }} />
+                      <button type="submit" disabled={isPending} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--primary-container)', background: 'none', border: 'none', cursor: 'pointer' }}>Guardar</button>
+                      <button type="button" onClick={() => setEditId(null)} style={{ fontSize: '13px', color: 'var(--outline)', background: 'none', border: 'none', cursor: 'pointer' }}>Cancelar</button>
                     </form>
                   </td>
                 ) : (
                   <>
-                    <td className="p-3">{esp.nombre}</td>
-                    <td className="p-3">${esp.precio_base.toFixed(2)}</td>
-                    <td className="p-3 text-right space-x-3">
-                      <button onClick={() => setEditId(esp.id)} className="text-primary text-xs font-semibold hover:underline">Editar</button>
-                      <button onClick={() => handleDelete(esp.id)} disabled={isPending} className="text-red-500 text-xs font-semibold hover:underline">Eliminar</button>
+                    <td style={{ padding: '0.75rem 1rem', color: 'var(--on-surface)' }}>{esp.nombre}</td>
+                    <td style={{ padding: '0.75rem 1rem', color: 'var(--on-surface)' }}>${esp.precio_base.toFixed(2)}</td>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                      <button onClick={() => setEditId(esp.id)} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--primary-container)', background: 'none', border: 'none', cursor: 'pointer', marginRight: '0.75rem' }}>Editar</button>
+                      <button onClick={() => handleDelete(esp.id)} disabled={isPending} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--error)', background: 'none', border: 'none', cursor: 'pointer' }}>Eliminar</button>
                     </td>
                   </>
                 )}
               </tr>
             ))}
-            {items.length === 0 && (
-              <tr><td colSpan={3} className="p-6 text-center text-foreground/50">No hay especialidades registradas.</td></tr>
-            )}
           </tbody>
         </table>
       </div>
@@ -135,10 +166,9 @@ function TablaEspecialidades({ items }: { items: Especialidad[] }) {
 }
 
 /* ─── Convenios ─── */
-
 function TablaConvenios({ items }: { items: Convenio[] }) {
   const [isPending, startTransition] = useTransition()
-  const [msg, setMsg] = useState<string | null>(null)
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [editId, setEditId] = useState<string | null>(null)
 
   const handleCreate = (e: React.FormEvent<HTMLFormElement>) => {
@@ -146,7 +176,7 @@ function TablaConvenios({ items }: { items: Convenio[] }) {
     const fd = new FormData(e.currentTarget)
     startTransition(async () => {
       const res = await crearConvenio(fd)
-      setMsg(res.error ?? '✓ Convenio creado')
+      setMsg(res.error ? { ok: false, text: res.error } : { ok: true, text: '✓ Convenio creado correctamente.' })
       if (!res.error) (e.target as HTMLFormElement).reset()
     })
   }
@@ -156,73 +186,90 @@ function TablaConvenios({ items }: { items: Convenio[] }) {
     const fd = new FormData(e.currentTarget)
     startTransition(async () => {
       const res = await editarConvenio(fd)
-      setMsg(res.error ?? '✓ Convenio actualizado')
+      setMsg(res.error ? { ok: false, text: res.error } : { ok: true, text: '✓ Convenio actualizado.' })
       if (!res.error) setEditId(null)
     })
   }
 
   const handleDelete = (id: string) => {
-    if (!confirm('¿Eliminar este convenio?')) return
+    if (!confirm('¿Eliminar este convenio? No se puede deshacer.')) return
     startTransition(async () => {
       const res = await eliminarConvenio(id)
-      setMsg(res.error ?? '✓ Convenio eliminado')
+      setMsg(res.error ? { ok: false, text: res.error } : { ok: true, text: '✓ Convenio eliminado.' })
     })
   }
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">Convenios / Aseguradoras</h2>
+      <h2 className="section-title">Convenios / Aseguradoras</h2>
 
       {msg && (
-        <div className={`text-sm p-2 rounded mb-4 ${msg.startsWith('✓') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-          {msg}
+        <div className={msg.ok ? 'alert-success' : 'alert-error'} style={{ marginBottom: '1rem' }}>
+          {msg.text}
         </div>
       )}
 
-      <form onSubmit={handleCreate} className="flex gap-3 mb-6 items-end">
-        <div className="flex-1 min-w-[200px]">
-          <label className="text-xs font-semibold text-foreground/60 block mb-1">Nombre Aseguradora</label>
-          <input name="nombre" required placeholder="Ej: Humana" className="w-full border rounded p-2 text-sm bg-white dark:bg-black" />
+      <form
+        onSubmit={handleCreate}
+        style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'flex-end', marginBottom: '1.5rem' }}
+      >
+        <div style={{ flex: 1, minWidth: '220px' }}>
+          <label className="input-label">Nombre Aseguradora</label>
+          <input
+            name="nombre"
+            required
+            placeholder="Ej: Humana"
+            className="input-field"
+          />
         </div>
-        <button type="submit" disabled={isPending} className="bg-primary text-white px-4 py-2 rounded font-bold text-sm hover:bg-primary/90 disabled:opacity-50">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="btn-primary"
+          style={{ width: 'auto' }}
+        >
           Agregar
         </button>
       </form>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
+      <div style={{ overflowX: 'auto', borderRadius: '0.5rem', border: '1px solid var(--outline-variant)' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
           <thead>
-            <tr className="border-b border-foreground/10 text-left">
-              <th className="p-3 font-semibold text-foreground/60">Aseguradora</th>
-              <th className="p-3 font-semibold text-foreground/60 w-40 text-right">Acciones</th>
+            <tr style={{ background: 'var(--surface-container-low)', borderBottom: '1px solid var(--outline-variant)' }}>
+              <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--on-surface-variant)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Aseguradora</th>
+              <th style={{ padding: '0.75rem 1rem', textAlign: 'right', fontWeight: 600, color: 'var(--on-surface-variant)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', width: '160px' }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
+            {items.length === 0 && (
+              <tr>
+                <td colSpan={2} style={{ padding: '2rem', textAlign: 'center', color: 'var(--on-surface-variant)', fontSize: '14px' }}>
+                  No hay convenios registrados.
+                </td>
+              </tr>
+            )}
             {items.map((conv) => (
-              <tr key={conv.id} className="border-b border-foreground/5 hover:bg-foreground/5 transition-colors">
+              <tr key={conv.id} style={{ borderBottom: '1px solid var(--surface-container)', background: 'var(--surface-container-lowest)' }}>
                 {editId === conv.id ? (
-                  <td colSpan={2} className="p-3">
-                    <form onSubmit={handleEdit} className="flex gap-2 items-end">
+                  <td colSpan={2} style={{ padding: '0.75rem 1rem' }}>
+                    <form onSubmit={handleEdit} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                       <input type="hidden" name="id" value={conv.id} />
-                      <input name="nombre" defaultValue={conv.nombre_aseguradora} required className="flex-1 border rounded p-1 text-sm bg-white dark:bg-black" />
-                      <button type="submit" disabled={isPending} className="text-primary font-bold text-xs">Guardar</button>
-                      <button type="button" onClick={() => setEditId(null)} className="text-foreground/50 text-xs">Cancelar</button>
+                      <input name="nombre" defaultValue={conv.nombre_aseguradora} required className="input-field" style={{ flex: 1, padding: '0.4rem 0.75rem', fontSize: '14px' }} />
+                      <button type="submit" disabled={isPending} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--primary-container)', background: 'none', border: 'none', cursor: 'pointer' }}>Guardar</button>
+                      <button type="button" onClick={() => setEditId(null)} style={{ fontSize: '13px', color: 'var(--outline)', background: 'none', border: 'none', cursor: 'pointer' }}>Cancelar</button>
                     </form>
                   </td>
                 ) : (
                   <>
-                    <td className="p-3">{conv.nombre_aseguradora}</td>
-                    <td className="p-3 text-right space-x-3">
-                      <button onClick={() => setEditId(conv.id)} className="text-primary text-xs font-semibold hover:underline">Editar</button>
-                      <button onClick={() => handleDelete(conv.id)} disabled={isPending} className="text-red-500 text-xs font-semibold hover:underline">Eliminar</button>
+                    <td style={{ padding: '0.75rem 1rem', color: 'var(--on-surface)' }}>{conv.nombre_aseguradora}</td>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                      <button onClick={() => setEditId(conv.id)} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--primary-container)', background: 'none', border: 'none', cursor: 'pointer', marginRight: '0.75rem' }}>Editar</button>
+                      <button onClick={() => handleDelete(conv.id)} disabled={isPending} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--error)', background: 'none', border: 'none', cursor: 'pointer' }}>Eliminar</button>
                     </td>
                   </>
                 )}
               </tr>
             ))}
-            {items.length === 0 && (
-              <tr><td colSpan={2} className="p-6 text-center text-foreground/50">No hay convenios registrados.</td></tr>
-            )}
           </tbody>
         </table>
       </div>

@@ -14,15 +14,19 @@ export async function verificarUsuario(requiredRoles: Role[]) {
     return { error: 'No autorizado', status: 401 }
   }
 
-  // Obtener el rol del usuario desde la tabla perfiles
+  // Obtener el rol y estado del usuario desde la tabla perfiles
   const { data: perfil, error: perfilError } = await supabase
     .from('perfiles')
-    .select('rol')
+    .select('rol, activo')
     .eq('id', user.id)
     .single()
 
   if (perfilError || !perfil) {
     return { error: 'Perfil no encontrado', status: 403 }
+  }
+
+  if (perfil.activo === false) {
+    return { error: 'Tu cuenta ha sido suspendida. Contacta a soporte.', status: 403 }
   }
 
   const userRole = perfil.rol as Role

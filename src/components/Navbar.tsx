@@ -1,8 +1,6 @@
-// Navbar actualizada para mostrar links de navegación según el rol del usuario autenticado.
-// Antes: siempre mostraba "Agendar" y "Mis Citas" para cualquier usuario logueado,
-// lo cual era incorrecto para médicos, agentes CC y admins.
-// Ahora: consulta perfiles.rol (permitido por la política RLS "Los usuarios pueden leer su propio perfil")
-// y renderiza los links apropiados para cada rol.
+// Navbar — Veris Online — Diseño Stitch
+// Muestra links de navegación según el rol del usuario.
+// Estilo: fondo blanco, logo azul marino, links sutiles, sin borde agresivo.
 
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
@@ -13,7 +11,6 @@ export default async function Navbar() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Consultar el rol del usuario autenticado (RLS permite leer el propio perfil)
   let rol: Role | null = null;
   if (user) {
     const { data: perfil } = await supabase
@@ -25,63 +22,115 @@ export default async function Navbar() {
   }
 
   return (
-    <nav className="w-full p-6 flex justify-between items-center max-w-7xl mx-auto border-b border-foreground/10 mb-8">
-      <Link href="/" className="text-2xl font-bold tracking-tighter text-primary">
-        Veris <span className="text-secondary">Online</span>
-      </Link>
-      <div className="flex items-center gap-4">
-        {user ? (
-          <>
-            {/* Links según rol — cada panel solo es visible para su rol correspondiente */}
-            {rol === 'paciente' && (
-              <>
-                <Link href="/agendar-cita" className="text-sm font-medium hover:text-primary transition-colors">
-                  Agendar
-                </Link>
-                <Link href="/mis-citas" className="text-sm font-medium hover:text-primary transition-colors">
-                  Mis Citas
-                </Link>
-              </>
-            )}
-            {rol === 'medico' && (
-              <Link href="/panel-medico" className="text-sm font-medium hover:text-primary transition-colors">
-                Panel Médico
+    <header
+      style={{
+        background: 'var(--surface-container-lowest)',
+        borderBottom: '1px solid var(--outline-variant)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+      }}
+    >
+      <nav
+        style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 2rem',
+          height: '60px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+        }}
+      >
+        {/* Brand */}
+        <Link
+          href="/"
+          style={{
+            fontWeight: 700,
+            fontSize: '20px',
+            color: 'var(--primary)',
+            textDecoration: 'none',
+            letterSpacing: '-0.01em',
+            flexShrink: 0,
+          }}
+        >
+          Veris <span style={{ color: 'var(--secondary)' }}>Online</span>
+        </Link>
+
+        {/* Nav Links */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          {user ? (
+            <>
+              {rol === 'paciente' && (
+                <>
+                  <NavLink href="/agendar-cita">Inicio</NavLink>
+                  <NavLink href="/mis-citas">Mis citas</NavLink>
+                  <NavLink href="/historial">Historial</NavLink>
+                  <NavLink href="/ayuda">Ayuda</NavLink>
+                </>
+              )}
+              {rol === 'medico' && (
+                <NavLink href="/panel-medico">Panel Médico</NavLink>
+              )}
+              {rol === 'agente_cc' && (
+                <NavLink href="/panel-cc">Panel CC</NavLink>
+              )}
+              {rol === 'admin' && (
+                <>
+                  <NavLink href="/admin">Administración</NavLink>
+                  <NavLink href="/panel-cc">Panel CC</NavLink>
+                </>
+              )}
+
+              {/* Divider visual */}
+              <div style={{ width: 1, height: 20, background: 'var(--outline-variant)', margin: '0 0.5rem' }} />
+
+              {/* Avatar placeholder + Logout */}
+              <LogoutButton />
+            </>
+          ) : (
+            <>
+              <NavLink href="/login">Iniciar Sesión</NavLink>
+              <Link
+                href="/registro"
+                style={{
+                  background: 'var(--primary-container)',
+                  color: 'var(--on-primary)',
+                  padding: '0.5rem 1.25rem',
+                  borderRadius: '0.5rem',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  transition: 'background 0.2s',
+                }}
+              >
+                Registrarse
               </Link>
-            )}
-            {rol === 'agente_cc' && (
-              <Link href="/panel-cc" className="text-sm font-medium hover:text-primary transition-colors">
-                Panel CC
-              </Link>
-            )}
-            {rol === 'admin' && (
-              <>
-                <Link href="/admin" className="text-sm font-medium hover:text-primary transition-colors">
-                  Administración
-                </Link>
-                <Link href="/panel-cc" className="text-sm font-medium hover:text-primary transition-colors">
-                  Panel CC
-                </Link>
-              </>
-            )}
-            <LogoutButton />
-          </>
-        ) : (
-          <>
-            <Link 
-              href="/login" 
-              className="px-5 py-2 text-sm font-medium rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
-              Iniciar Sesión
-            </Link>
-            <Link 
-              href="/registro" 
-              className="px-5 py-2 text-sm font-medium rounded-full bg-primary text-white hover:bg-primary/90 transition-all shadow-sm hover:shadow-md"
-            >
-              Registrarse
-            </Link>
-          </>
-        )}
-      </div>
-    </nav>
+            </>
+          )}
+        </div>
+      </nav>
+    </header>
+  );
+}
+
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        fontSize: '14px',
+        fontWeight: 500,
+        color: 'var(--on-surface-variant)',
+        textDecoration: 'none',
+        padding: '0.4rem 0.75rem',
+        borderRadius: '0.375rem',
+        transition: 'background 0.15s, color 0.15s',
+      }}
+      className="hover:bg-surface-container hover:text-primary"
+    >
+      {children}
+    </Link>
   );
 }

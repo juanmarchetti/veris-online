@@ -90,3 +90,86 @@ export async function actualizarRolYPerfil(formData: FormData) {
   revalidatePath('/admin')
   return { ok: true, error: null }
 }
+
+export async function crearUsuarioStaff(formData: FormData) {
+  const { error: authError } = await verificarUsuario(['admin'])
+  if (authError) {
+    return { ok: false, error: 'No autorizado: se requiere rol admin.' }
+  }
+
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const rol = formData.get('rol') as Role
+  const nombreMedico = formData.get('nombreMedico') as string
+  const idEspecialidad = formData.get('idEspecialidad') as string
+
+  if (!email || !password || !rol) {
+    return { ok: false, error: 'Faltan datos requeridos (email, password, rol).' }
+  }
+
+  if (rol === 'medico' && (!nombreMedico || !idEspecialidad)) {
+    return { ok: false, error: 'Para el rol médico se requieren la especialidad y el nombre completo.' }
+  }
+
+  const adminClient = createAdminClient()
+
+  // 1. Crear el usuario en auth.users
+  const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  })
+
+  if (createError || !newUser.user) {
+    return { ok: false, error: 'Error al crear usuario: ' + (createError?.message || 'Error desconocido.') }
+  }
+
+  const userId = newUser.user.id
+
+  // 2. El trigger de la DB habrá creado un perfil por defecto (paciente). Lo actualizamos al rol seleccionado.
+  const { error: rolError } = await adminClient
+    .from('perfiles')
+    .update({ rol: rol })
+    .eq('id', userId)
+
+  if (rolError) {
+    return { ok: false, error: 'Usuario creado pero falló al asignar rol: ' + rolError.message }
+  }
+
+  // 3. Si es médico, crear el perfil de médico
+  if (rol === 'medico') {
+    const { error: medicoError } = await adminClient.from('medicos').insert({
+      nombre_completo: nombreMedico.trim(),
+      id_especialidad: idEspecialidad,
+      id_auth_user: userId,
+    })
+
+    if (medicoError) {
+      return { ok: false, error: 'Rol asignado, pero falló la creación en tabla medicos: ' + medicoError.message }
+    }
+  }
+
+  revalidatePath('/admin')
+  return { ok: true, error: null }
+}
+
+export async function toggleSuspensionUsuario(userId: string, currentActivo: boolean) {
+  const { error: authError } = await verificarUsuario(['admin'])
+  if (authError) {
+    return { ok: false, error: 'No autorizado: se requiere rol admin.' }
+  }
+
+  const adminClient = createAdminClient()
+  
+  const { error } = await adminClient
+    .from('perfiles')
+    .update({ activo: !currentActivo })
+    .eq('id', userId)
+
+  if (error) {
+    return { ok: false, error: 'Error al actualizar suspensión: ' + error.message }
+  }
+
+  revalidatePath('/admin')
+  return { ok: true, error: null }
+}
