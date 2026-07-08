@@ -8,7 +8,6 @@ type CitaRespuesta = {
   id: string
   fecha_hora: string
   estado: string
-  enlace_zoom: string | null
   requiere_valoracion_presencial: boolean
   especialidades: { nombre: string } | null
   medicos: { nombre_completo: string } | null
@@ -70,7 +69,6 @@ export default async function MisCitasPage() {
       id,
       fecha_hora,
       estado,
-      enlace_zoom,
       requiere_valoracion_presencial,
       especialidades(nombre),
       medicos(nombre_completo)
@@ -128,15 +126,13 @@ export default async function MisCitasPage() {
                     Pagar ahora
                   </Link>
                 )}
-                {cita.enlace_zoom && cita.estado === 'confirmada' && (
-                  <a
-                    href={cita.enlace_zoom}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                {(cita.estado === 'confirmada' || cita.estado === 'en_curso') && (
+                  <Link
+                    href={`/videoconsulta?cita=${cita.id}`}
                     className="bg-primary text-white px-5 py-2 rounded-md font-bold hover:bg-primary/90 transition-colors text-sm"
                   >
                     Conectarse a Zoom
-                  </a>
+                  </Link>
                 )}
               </div>
             </div>

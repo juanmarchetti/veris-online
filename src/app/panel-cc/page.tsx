@@ -10,6 +10,7 @@ import { verificarUsuario } from '@/utils/auth'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import FiltrosCitas from './FiltrosCitas'
+import { marcarHistorialClinicoRegistrado } from './actions'
 
 // Forzar renderizado dinámico: página autenticada con filtros dinámicos (searchParams).
 export const dynamic = 'force-dynamic'
@@ -22,9 +23,11 @@ type CitaCC = {
   motivo_consulta: string
   canal_origen: string
   pacientes: {
+    id: string
     nombre_completo: string
     correo: string
     telefono: string | null
+    historial_clinico_veris: boolean
   } | null
   especialidades: { nombre: string } | null
   medicos: { nombre_completo: string } | null
@@ -95,7 +98,7 @@ export default async function PanelCCPage({ searchParams }: { searchParams: Sear
       estado,
       motivo_consulta,
       canal_origen,
-      pacientes(nombre_completo, correo, telefono),
+      pacientes(id, nombre_completo, correo, telefono, historial_clinico_veris),
       especialidades(nombre),
       medicos(nombre_completo)
     `)
@@ -159,6 +162,13 @@ export default async function PanelCCPage({ searchParams }: { searchParams: Sear
                     <p className="text-sm text-foreground/60">{cita.pacientes?.correo ?? '—'}</p>
                     {cita.pacientes?.telefono && (
                       <p className="text-sm text-foreground/60">{cita.pacientes.telefono}</p>
+                    )}
+                    {cita.pacientes && !cita.pacientes.historial_clinico_veris && (
+                      <form action={marcarHistorialClinicoRegistrado.bind(null, cita.pacientes.id)} className="mt-2">
+                        <button type="submit" className="text-xs bg-yellow-100 text-yellow-800 border border-yellow-300 px-2 py-1 rounded hover:bg-yellow-200">
+                          Marcar Historial Registrado
+                        </button>
+                      </form>
                     )}
                   </div>
 

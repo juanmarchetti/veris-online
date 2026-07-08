@@ -21,8 +21,13 @@ export async function simularPagoAprobado(idCita: string) {
 
   let enlaceZoom = null
   if (cita) {
-    const { generarEnlaceZoom } = await import('@/utils/zoom')
-    enlaceZoom = await generarEnlaceZoom(idCita, cita.fecha_hora, cita.motivo_consulta)
+    try {
+      const { generarEnlaceZoom } = await import('@/utils/zoom')
+      enlaceZoom = await generarEnlaceZoom(idCita, cita.fecha_hora, cita.motivo_consulta)
+    } catch (err) {
+      console.error('No se pudo generar el enlace de Zoom al aprobar el pago:', err)
+      enlaceZoom = null // se generará de forma perezosa en /videoconsulta
+    }
   }
 
   // Llamar a la RPC SECURITY DEFINER para aprobar pago y confirmar cita atómicamente
@@ -37,8 +42,12 @@ export async function simularPagoAprobado(idCita: string) {
 
   // Notificación por correo
   if (cita) {
-    const { enviarCorreoConfirmacion } = await import('@/utils/resend')
-    await enviarCorreoConfirmacion(idCita)
+    try {
+      const { enviarCorreoConfirmacion } = await import('@/utils/resend')
+      await enviarCorreoConfirmacion(idCita)
+    } catch (err) {
+      console.error('Error al enviar el correo de confirmación:', err)
+    }
   }
 
   revalidatePath('/mis-citas')

@@ -11,6 +11,7 @@ import { verificarUsuario } from '@/utils/auth'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import AccionesCitaMedico from './AccionesCitaMedico'
+import Link from 'next/link'
 
 // Forzar renderizado dinámico: esta página requiere cookies de sesión en cada request.
 // Sin esto, Next.js intentaría pre-renderizar estáticamente y fallaría sin env vars.
@@ -22,7 +23,6 @@ type CitaMedico = {
   fecha_hora: string
   estado: string
   motivo_consulta: string
-  enlace_zoom: string | null
   pacientes: { nombre_completo: string; correo: string } | null
   especialidades: { nombre: string } | null
 }
@@ -101,7 +101,6 @@ export default async function PanelMedicoPage() {
       fecha_hora,
       estado,
       motivo_consulta,
-      enlace_zoom,
       pacientes(nombre_completo, correo),
       especialidades(nombre)
     `)
@@ -164,16 +163,14 @@ export default async function PanelMedicoPage() {
                 </div>
               </div>
 
-              {/* Acceso a la videoconsulta si el enlace existe y la cita está confirmada */}
-              {cita.enlace_zoom && cita.estado === 'confirmada' && (
-                <a
-                  href={cita.enlace_zoom}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              {/* Acceso a la videoconsulta si la cita está confirmada o en curso */}
+              {(cita.estado === 'confirmada' || cita.estado === 'en_curso') && (
+                <Link
+                  href={`/videoconsulta?cita=${cita.id}`}
                   className="bg-primary text-white px-5 py-2 rounded-md font-bold hover:bg-primary/90 transition-colors text-sm shrink-0"
                 >
                   Unirse a Zoom
-                </a>
+                </Link>
               )}
               
               {/* Acciones del Médico: en curso, finalizar, documentos */}

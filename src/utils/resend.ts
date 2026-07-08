@@ -29,22 +29,28 @@ export async function enviarCorreoConfirmacion(idCita: string) {
     if (!cita) throw new Error('Cita no encontrada');
 
     // Aquí iría la lógica real usando el SDK de Resend:
-    // const { Resend } = await import('resend');
-    // const resend = new Resend(process.env.RESEND_API_KEY);
-    // await resend.emails.send({
-    //   from: 'Veris Online <no-reply@veris.com>',
-    //   to: cita.pacientes.correo,
-    //   subject: 'Confirmación de Videoconsulta Veris',
-    //   html: `
-    //     <h1>¡Videoconsulta Confirmada!</h1>
-    //     <p>Hola ${cita.pacientes.nombre_completo},</p>
-    //     <p>Tu cita con el/la Dr(a). ${cita.medicos.nombre_completo} para <strong>${cita.especialidades.nombre}</strong> ha sido confirmada.</p>
-    //     <p><strong>Fecha y Hora:</strong> ${new Date(cita.fecha_hora).toLocaleString('es-EC')}</p>
-    //     <p><strong>Enlace Zoom:</strong> <a href="${cita.enlace_zoom}">${cita.enlace_zoom}</a></p>
-    //     <br/>
-    //     <p>Gracias por confiar en Veris.</p>
-    //   `
-    // });
+    const { Resend } = await import('resend');
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    
+    // Asignación de tipos explícita por como retorna Supabase las relaciones
+    const paciente = cita.pacientes as unknown as { correo: string, nombre_completo: string }
+    const medico = cita.medicos as unknown as { nombre_completo: string }
+    const especialidad = cita.especialidades as unknown as { nombre: string }
+    
+    await resend.emails.send({
+      from: 'Veris Online <onboarding@resend.dev>', // Usar correo verificado por resend, o onboarding
+      to: paciente.correo,
+      subject: 'Confirmación de Videoconsulta Veris',
+      html: `
+        <h1>¡Videoconsulta Confirmada!</h1>
+        <p>Hola ${paciente.nombre_completo},</p>
+        <p>Tu cita con el/la Dr(a). ${medico.nombre_completo} para <strong>${especialidad.nombre}</strong> ha sido confirmada.</p>
+        <p><strong>Fecha y Hora:</strong> ${new Date(cita.fecha_hora).toLocaleString('es-EC')}</p>
+        <p><strong>Enlace Zoom:</strong> <a href="${cita.enlace_zoom}">${cita.enlace_zoom || 'Pendiente de generación'}</a></p>
+        <br/>
+        <p>Gracias por confiar en Veris.</p>
+      `
+    });
 
     console.log(`Correo enviado exitosamente a: ${(cita.pacientes as any).correo}`);
     return { success: true };

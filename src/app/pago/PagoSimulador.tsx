@@ -53,14 +53,20 @@ export default function PagoSimulador({
   const handleAprobar = async () => {
     setLoading('aprobando')
     setError('')
-    const result = await simularPagoAprobado(idCita)
-    if (result.error) {
-      setError(result.error)
+    try {
+      const result = await simularPagoAprobado(idCita)
+      if (result.error) {
+        setError(result.error)
+        setLoading('')
+      } else {
+        setSuccess('¡Pago simulado como aprobado! Tu cita ha sido confirmada.')
+        setLoading('')
+        setTimeout(() => router.push('/mis-citas'), 2000)
+      }
+    } catch (err) {
+      console.error(err)
+      setError('Ocurrió un error inesperado al procesar el pago.')
       setLoading('')
-    } else {
-      setSuccess('¡Pago simulado como aprobado! Tu cita ha sido confirmada.')
-      setLoading('')
-      setTimeout(() => router.push('/mis-citas'), 2000)
     }
   }
 
