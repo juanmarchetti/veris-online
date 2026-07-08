@@ -80,7 +80,8 @@ export default function LoginPage() {
                 historial_clinico_veris: false
               });
               if (insertError) {
-                throw new Error('No se pudo completar el registro de tu perfil. Contacta a soporte.');
+                console.error('Error insertando paciente post-login:', insertError);
+                throw new Error(`No se pudo completar el registro de tu perfil (${insertError.message}). Contacta a soporte o regístrate nuevamente con la cédula correcta.`);
               }
             }
           }
