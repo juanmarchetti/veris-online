@@ -57,15 +57,6 @@ const DIAS_FALLBACK   = 14       // días a buscar automáticamente si no hay cu
 const TZ_OFFSET_MS    = 5 * 60 * 60 * 1000  // UTC-5 (Ecuador)
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
-
-/**
- * Convierte la hora "actual" a la representación local de Ecuador (UTC-5)
- * para comparar con los slots, que también se construyen en hora local.
- */
-function ahoraEcuador(): Date {
-  return new Date(Date.now() - TZ_OFFSET_MS)
-}
-
 /**
  * Dado un médico y una fecha ISO (YYYY-MM-DD), devuelve el array de slots
  * candidatos en esa fecha. Cada slot es la Date de inicio en UTC para que
@@ -124,7 +115,7 @@ async function buscarSlotParaMedico(
   duracionMinutos: number,
   esAlternativa: boolean,
 ): Promise<Omit<SlotDisponible, 'esDoctorAlternativo'> | null> {
-  const ahora = ahoraEcuador()
+  const ahora = new Date()
 
   for (const fechaISO of fechasISO) {
     // getDay() sobre T12:00:00 local es seguro en cualquier timezone del servidor
