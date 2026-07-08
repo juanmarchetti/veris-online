@@ -52,7 +52,7 @@ export async function enviarCorreoConfirmacion(idCita: string) {
       `
     });
 
-    console.log(`Correo enviado exitosamente a: ${(cita.pacientes as { correo: string }).correo}`);
+    console.log(`Correo enviado exitosamente a: ${(cita.pacientes as unknown as { correo: string }).correo}`);
     return { success: true };
   } catch (err) {
     // Fallos silenciosos como requiere la especificación (no rompe el flujo del usuario)

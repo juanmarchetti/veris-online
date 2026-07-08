@@ -46,7 +46,6 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
 
   // Efecto para buscar horas cuando cambian los dependientes
   useEffect(() => {
-    setHoraSeleccionada('')
     if (!medicoSeleccionado || !fecha) {
       setHorasDisponibles([])
       return
@@ -137,6 +136,7 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
             onChange={(e) => {
               setEspecialidadSeleccionada(e.target.value)
               setMedicoSeleccionado('')
+              setHoraSeleccionada('')
             }}
             className="input-field"
             style={{ width: '100%' }}
@@ -156,7 +156,10 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
             className="input-field" 
             style={{ width: '100%' }}
             value={medicoSeleccionado}
-            onChange={(e) => setMedicoSeleccionado(e.target.value)}
+            onChange={(e) => {
+              setMedicoSeleccionado(e.target.value)
+              setHoraSeleccionada('')
+            }}
           >
             <option value="">Selecciona un médico</option>
             {medicosFiltrados.map(med => (
@@ -194,8 +197,12 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
               <DayPicker
                 mode="single"
                 selected={fecha}
-                onSelect={setFecha}
-                disabled={{ before: hoy }}
+                onSelect={(d) => {
+                  setFecha(d)
+                  setHoraSeleccionada('')
+                }}
+                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                className="w-full flex justify-center p-0"
                 locale={es}
               />
             </div>

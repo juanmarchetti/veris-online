@@ -26,13 +26,13 @@ describe('panel-medico actions', () => {
   })
 
   it('rechaza marcar cita en curso si el usuario no es médico', async () => {
-    vi.mocked(verificarUsuario).mockResolvedValue({ error: 'No autorizado', status: 401, user: null })
+    vi.mocked(verificarUsuario).mockResolvedValue({ error: 'No autorizado', status: 401, user: undefined })
     const result = await marcarCitaEnCurso('cita-1')
     expect(result).toEqual({ error: 'No autorizado.' })
   })
 
   it('rechaza si la cita no existe o no pertenece al médico', async () => {
-    vi.mocked(verificarUsuario).mockResolvedValue({ error: null, status: 200, user: { id: 'u1' } as any })
+    vi.mocked(verificarUsuario).mockResolvedValue({ error: undefined, status: 200, user: { id: 'u1' } as any })
     
     // mock medicos select
     const medicosSelect = {
