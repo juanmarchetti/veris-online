@@ -1,7 +1,7 @@
 import { verificarUsuario } from '@/utils/auth'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { estaEnVentanaDeConexion } from '@/utils/validaciones-videoconsulta'
+import { estaEnVentanaDeConexion, estaCitaExpirada } from '@/utils/validaciones-videoconsulta'
 import { generarEnlaceZoom, ZoomApiError } from '@/utils/zoom'
 import Link from 'next/link'
 
@@ -92,7 +92,25 @@ export default async function VideoconsultaPage({
 
   // 2. Validar ventana de tiempo (3 minutos)
   const fechaHora = new Date(cita.fecha_hora)
-  if (!estaEnVentanaDeConexion(fechaHora)) {
+  const duracion = cita.duracion_minutos || 60
+
+  if (estaCitaExpirada(fechaHora, duracion)) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-surface-container-lowest">
+        <div className="card max-w-md w-full p-8 text-center border-t-4 border-t-error">
+          <h1 className="text-2xl font-bold text-error mb-4">Consulta Cerrada</h1>
+          <p className="text-on-surface-variant mb-6">
+            Esta consulta ya no está disponible para conexión. Si necesitas ayuda, contacta a soporte.
+          </p>
+          <Link href={paciente?.id_auth_user === user.id ? '/mis-citas' : '/panel-medico'} className="btn-primary inline-block w-full">
+            Volver a mis citas
+          </Link>
+        </div>
+      </main>
+    )
+  }
+
+  if (!estaEnVentanaDeConexion(fechaHora, duracion)) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-surface-container-lowest">
         <div className="card max-w-md w-full p-8 text-center border-t-4 border-t-primary-container">
@@ -106,12 +124,9 @@ export default async function VideoconsultaPage({
               {fechaHora.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Guayaquil' })}
             </p>
           </div>
-          <button 
-            onClick={/* Como es server component, un simple refresh funciona */ undefined}
-            className="btn-primary w-full"
-          >
-            <a href={`/videoconsulta?cita=${idCita}`}>Actualizar página</a>
-          </button>
+          <a href={`/videoconsulta?cita=${idCita}`} className="btn-primary w-full inline-block text-center">
+            Actualizar página
+          </a>
         </div>
       </main>
     )
