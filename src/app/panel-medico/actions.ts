@@ -131,6 +131,14 @@ export async function agregarDocumentoClinico(formData: FormData) {
     referencia_documento: doc.id
   })
 
+  // TAREA D: Enviar correo de notificación de documento clínico
+  try {
+    const { enviarCorreoDocumentoClinico } = await import('@/utils/resend')
+    await enviarCorreoDocumentoClinico(doc.id)
+  } catch (err) {
+    console.error('Error al enviar el correo de documento clínico:', err)
+  }
+
   revalidatePath('/panel-medico')
   return { success: true }
 }

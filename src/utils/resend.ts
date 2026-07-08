@@ -52,11 +52,70 @@ export async function enviarCorreoConfirmacion(idCita: string) {
       `
     });
 
-    console.log(`Correo enviado exitosamente a: ${(cita.pacientes as any).correo}`);
+    console.log(`Correo enviado exitosamente a: ${(cita.pacientes as { correo: string }).correo}`);
     return { success: true };
   } catch (err) {
     // Fallos silenciosos como requiere la especificación (no rompe el flujo del usuario)
     console.error('Error enviando correo de confirmación:', err);
+    return { success: false, error: err };
+  }
+}
+
+export async function enviarCorreoDocumentoClinico(idDocumento: string) {
+  const isResendEnabled = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== '';
+
+  if (!isResendEnabled) {
+    console.log('Resend no configurado. Simulando envío de correo de documento clínico...');
+    return { success: true, simulated: true };
+  }
+
+  try {
+    const supabase = await createClient()
+
+    // Obtener detalles del documento para el correo
+    const { data: doc } = await supabase
+      .from('documentos_clinicos')
+      .select(`
+        tipo_documento,
+        url_archivo,
+        citas (
+          pacientes (correo, nombre_completo),
+          medicos (nombre_completo)
+        )
+      `)
+      .eq('id', idDocumento)
+      .single()
+
+    if (!doc) throw new Error('Documento no encontrado');
+
+    const cita = doc.citas as unknown as { pacientes: any, medicos: any }
+    if (!cita) throw new Error('Cita no encontrada para el documento');
+
+    const paciente = cita.pacientes as { correo: string, nombre_completo: string }
+    const medico = cita.medicos as { nombre_completo: string }
+
+    const { Resend } = await import('resend');
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    
+    await resend.emails.send({
+      from: 'Veris Online <onboarding@resend.dev>', // Usar correo verificado
+      to: paciente.correo,
+      subject: 'Nuevo Documento Clínico Veris',
+      html: `
+        <h1>Nuevo Documento Disponible</h1>
+        <p>Hola ${paciente.nombre_completo},</p>
+        <p>El/La Dr(a). ${medico.nombre_completo} ha subido un nuevo documento de tipo: <strong>${doc.tipo_documento}</strong>.</p>
+        <p>Puedes revisarlo en tu historial médico o mediante el siguiente enlace:</p>
+        <p><a href="${doc.url_archivo}">Ver Documento</a></p>
+        <br/>
+        <p>Gracias por confiar en Veris.</p>
+      `
+    });
+
+    console.log(`Correo de documento enviado exitosamente a: ${paciente.correo}`);
+    return { success: true };
+  } catch (err) {
+    console.error('Error enviando correo de documento clínico:', err);
     return { success: false, error: err };
   }
 }
