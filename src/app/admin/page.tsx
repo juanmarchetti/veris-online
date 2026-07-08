@@ -30,51 +30,54 @@ export default async function AdminPage() {
   const supabase = await createClient()
   const adminClient = createAdminClient()
 
-  // Estadísticas generales (solo conteos, no datos de pacientes)
+  // Estadísticas generales — cruzadas con la tabla 'perfiles' para que los
+  // conteos reflejen roles reales, no filas en tablas auxiliares.
   const [
     { count: totalPacientes },
     { count: totalMedicos },
     { count: totalCitas }
   ] = await Promise.all([
-    supabase.from('pacientes').select('*', { count: 'exact', head: true }),
-    supabase.from('medicos').select('*', { count: 'exact', head: true }),
+    // Pacientes reales: rol = 'paciente' en perfiles
+    supabase.from('perfiles').select('*', { count: 'exact', head: true }).eq('rol', 'paciente'),
+    // Médicos activos: rol = 'medico' Y activo = true en perfiles
+    supabase.from('perfiles').select('*', { count: 'exact', head: true }).eq('rol', 'medico').eq('activo', true),
     supabase.from('citas').select('*', { count: 'exact', head: true }),
   ])
 
-  // Obtener SOLO el personal (médicos, agentes, admins) — NO pacientes
+  // Obtener SOLO el personal (médicos, agentes, admins) — NO pacientes.
+  // La fuente de verdad de roles es la tabla 'perfiles'. Los emails se obtienen
+  // del Auth Admin API cuando está disponible (requiere SERVICE_ROLE_KEY).
+  const ROLES_PERSONAL: string[] = ['medico', 'agente_cc', 'admin']
+
   const [
     { data: authUsersData },
-    { data: perfiles },
+    { data: perfilesPersonal },
     { data: especialidades },
     { data: conveniosData },
     { data: especialidadesConPrecio },
   ] = await Promise.all([
     adminClient.auth.admin.listUsers({ perPage: 500 }),
-    adminClient.from('perfiles').select('id, rol, activo'),
+    // Filtrar directamente en BD — fuente de verdad para el listado de personal
+    adminClient.from('perfiles').select('id, rol, activo').in('rol', ROLES_PERSONAL),
     adminClient.from('especialidades').select('id, nombre').order('nombre'),
     adminClient.from('convenios').select('id, nombre_aseguradora').order('nombre_aseguradora'),
     adminClient.from('especialidades').select('id, nombre, precio_base').order('nombre'),
   ])
 
-  // Mapa de id -> { rol, activo }
-  type PerfilDB = { id: string; rol: string; activo: boolean | null }
-  const perfilMap = new Map<string, { rol: string; activo: boolean }>(
-    (perfiles as PerfilDB[] ?? []).map((p) => [p.id, { rol: p.rol, activo: p.activo ?? true }])
+  // Mapa de Auth users para obtener email: id -> email
+  const emailMap = new Map<string, string>(
+    (authUsersData?.users ?? []).map((u) => [u.id, u.email ?? 'Sin correo'])
   )
 
-  // Filtrar SOLO personal (no pacientes)
-  const ROLES_PERSONAL: string[] = ['medico', 'agente_cc', 'admin']
-  const personal: StaffMember[] = (authUsersData?.users ?? [])
-    .map((u) => {
-      const perfil = perfilMap.get(u.id)
-      return {
-        id: u.id,
-        email: u.email ?? 'Sin correo',
-        rol: perfil?.rol ?? 'paciente',
-        activo: perfil?.activo ?? true,
-      }
-    })
-    .filter((u) => ROLES_PERSONAL.includes(u.rol))
+  // Construir la lista de personal a partir de 'perfiles' (siempre confiable)
+  // y enriquecer con email si está disponible en Auth.
+  type PerfilDB = { id: string; rol: string; activo: boolean | null }
+  const personal: StaffMember[] = (perfilesPersonal as PerfilDB[] ?? []).map((p) => ({
+    id: p.id,
+    email: emailMap.get(p.id) ?? `${p.id.slice(0, 8)}…`,   // fallback si AUTH no responde
+    rol: p.rol,
+    activo: p.activo ?? true,
+  }))
 
   return (
     <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
