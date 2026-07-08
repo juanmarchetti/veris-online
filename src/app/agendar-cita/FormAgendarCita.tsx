@@ -15,7 +15,7 @@
 import { useState, useMemo, useTransition } from 'react'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
-import { format, parseISO, addDays } from 'date-fns'
+import { format, parseISO, addDays, startOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useRouter } from 'next/navigation'
 import {
@@ -324,7 +324,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
               selected={diasSeleccionados}
               onSelect={(days) => setDiasSeleccionados(days ?? [])}
               disabled={[
-                { before: addDays(new Date(), 1) }, // mínimo mañana
+                { before: startOfDay(new Date()) }, // permite seleccionar desde hoy
                 { dayOfWeek: [0] },                  // sin domingos
                 (date: Date) => (diasSeleccionados.length >= MAX_DIAS && !diasSeleccionados.some(d => d.toDateString() === date.toDateString()))
               ]}
