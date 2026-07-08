@@ -10,7 +10,7 @@ import Link from 'next/link';
 // A futuro: lookup del correo asociado al número de identificación.
 
 const RUTA_POR_ROL: Record<string, string> = {
-  paciente: '/agendar-cita',
+  paciente: '/inicio',
   medico: '/panel-medico',
   agente_cc: '/panel-cc',
   admin: '/admin',
