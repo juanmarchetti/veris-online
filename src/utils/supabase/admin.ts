@@ -12,13 +12,17 @@ export function createAdminClient() {
 }
 
 export async function actualizarRolUsuario(userId: string, nuevoRol: Role) {
-  const adminClient = createAdminClient()
-  const { data, error } = await adminClient
-    .from('perfiles')
-    .update({ rol: nuevoRol })
-    .eq('id', userId)
-    .select()
-    .single()
-    
-  return { data, error }
+  try {
+    const adminClient = createAdminClient()
+    const { data, error } = await adminClient
+      .from('perfiles')
+      .update({ rol: nuevoRol })
+      .eq('id', userId)
+      .select()
+      .single()
+      
+    return { data, error }
+  } catch (err: any) {
+    return { data: null, error: { message: 'Falta configurar SUPABASE_SERVICE_ROLE_KEY en el servidor.' } }
+  }
 }

@@ -57,7 +57,12 @@ export async function actualizarRolYPerfil(formData: FormData) {
       }
     }
 
-    const adminClient = createAdminClient()
+    let adminClient;
+    try {
+      adminClient = createAdminClient()
+    } catch (err: any) {
+      return { ok: false, error: 'Error de configuración: Faltan variables de entorno del servidor (SUPABASE_SERVICE_ROLE_KEY).' }
+    }
 
     // Verificar si ya existe fila en medicos para este auth user (evitar duplicados)
     const { data: medicoExistente } = await adminClient
@@ -111,7 +116,12 @@ export async function crearUsuarioStaff(formData: FormData) {
     return { ok: false, error: 'Para el rol médico se requieren la especialidad y el nombre completo.' }
   }
 
-  const adminClient = createAdminClient()
+  let adminClient;
+  try {
+    adminClient = createAdminClient()
+  } catch (err: any) {
+    return { ok: false, error: 'Error de configuración: Faltan variables de entorno del servidor (SUPABASE_SERVICE_ROLE_KEY).' }
+  }
 
   // 1. Crear el usuario en auth.users
   const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
@@ -159,7 +169,12 @@ export async function toggleSuspensionUsuario(userId: string, currentActivo: boo
     return { ok: false, error: 'No autorizado: se requiere rol admin.' }
   }
 
-  const adminClient = createAdminClient()
+  let adminClient;
+  try {
+    adminClient = createAdminClient()
+  } catch (err: any) {
+    return { ok: false, error: 'Error de configuración: Faltan variables de entorno del servidor (SUPABASE_SERVICE_ROLE_KEY).' }
+  }
   
   const { error } = await adminClient
     .from('perfiles')
