@@ -22,16 +22,12 @@ export default async function AgendarCitaPage() {
   const [
     { data: especialidades },
     { data: medicos },
-    { data: convenios },
-    { data: paciente }
+    { data: convenios }
   ] = await Promise.all([
     supabase.from('especialidades').select('id, nombre').order('nombre'),
     supabase.from('medicos').select('id, nombre_completo, id_especialidad').not('id_auth_user', 'is', null).order('nombre_completo'),
     supabase.from('convenios').select('id, nombre_aseguradora').order('nombre_aseguradora'),
-    supabase.from('pacientes').select('historial_clinico_veris').eq('id_auth_user', user!.id).single()
   ])
-
-  const tieneHistorialClinico = paciente?.historial_clinico_veris ?? false
 
   return (
     <main className="flex flex-col items-center p-6 max-w-3xl mx-auto w-full">
@@ -54,7 +50,6 @@ export default async function AgendarCitaPage() {
         especialidades={especialidades ?? []}
         medicos={medicos ?? []}
         convenios={convenios ?? []}
-        tieneHistorialClinico={tieneHistorialClinico}
       />
     </main>
   )

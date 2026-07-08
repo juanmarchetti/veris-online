@@ -42,7 +42,6 @@ type Props = {
   especialidades: Especialidad[]
   medicos:        Medico[]
   convenios:      Convenio[]
-  tieneHistorialClinico: boolean
 }
 
 type SlotAsignado = {
@@ -78,7 +77,7 @@ function formatearFechaAmigable(fechaISO: string): string {
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export default function FormAgendaAutomatica({ especialidades, medicos, convenios, tieneHistorialClinico }: Props) {
+export default function FormAgendaAutomatica({ especialidades, medicos, convenios }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 

@@ -34,18 +34,12 @@ export async function POST(req: NextRequest) {
     // ── 2. Obtener perfil del paciente ────────────────────────────────────
     const { data: paciente, error: pacError } = await supabase
       .from('pacientes')
-      .select('id, historial_clinico_veris, nombre_completo')
+      .select('id, nombre_completo')
       .eq('id_auth_user', user.id)
       .single()
 
     if (pacError || !paciente) {
       return NextResponse.json({ error: 'No se encontró tu perfil de paciente.' }, { status: 404 })
-    }
-
-    if (!paciente.historial_clinico_veris) {
-      return NextResponse.json({
-        error: 'Debes comunicarte al Contact Center (6009600) para registrar tu historial clínico antes de poder agendar.'
-      }, { status: 403 })
     }
 
     // ── 3. Parsear y validar el body ──────────────────────────────────────
