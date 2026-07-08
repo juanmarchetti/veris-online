@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Calendar, MonitorPlay, CreditCard, Mail, Phone } from 'lucide-react'
 
 export default function AyudaPage() {
   return (
@@ -9,7 +10,7 @@ export default function AyudaPage() {
         <div className="space-y-6">
           <section className="bg-surface p-6 rounded-xl border border-foreground/10">
             <h2 className="text-xl font-bold text-secondary mb-3 flex items-center gap-2">
-              <span>📅</span> ¿Cómo agendar una cita?
+              <Calendar className="w-5 h-5" /> ¿Cómo agendar una cita?
             </h2>
             <p className="text-foreground/80 leading-relaxed text-sm">
               Para agendar una cita, dirígete a la pestaña de <strong>Inicio</strong>, selecciona tu motivo de consulta, la especialidad y el médico de tu preferencia. 
@@ -19,7 +20,7 @@ export default function AyudaPage() {
 
           <section className="bg-surface p-6 rounded-xl border border-foreground/10">
             <h2 className="text-xl font-bold text-secondary mb-3 flex items-center gap-2">
-              <span>💻</span> ¿Cómo me conecto a la videoconsulta?
+              <MonitorPlay className="w-5 h-5" /> ¿Cómo me conecto a la videoconsulta?
             </h2>
             <p className="text-foreground/80 leading-relaxed text-sm">
               Ve a la sección <strong>Mis citas</strong>. Si tu cita está confirmada y faltan menos de 3 minutos para la hora agendada, 
@@ -29,7 +30,7 @@ export default function AyudaPage() {
 
           <section className="bg-surface p-6 rounded-xl border border-foreground/10">
             <h2 className="text-xl font-bold text-secondary mb-3 flex items-center gap-2">
-              <span>💳</span> Problemas con el pago
+              <CreditCard className="w-5 h-5" /> Problemas con el pago
             </h2>
             <p className="text-foreground/80 leading-relaxed text-sm">
               Si tu pago fue rechazado, puedes volver a intentarlo desde <strong>Mis citas</strong> siempre y cuando no hayan pasado 30 minutos desde 
@@ -45,11 +46,11 @@ export default function AyudaPage() {
           </p>
           <div className="flex justify-center gap-4 text-sm font-medium">
             <a href="mailto:soporte@veris.med.ec" className="text-primary hover:underline flex items-center gap-1">
-              ✉️ soporte@veris.med.ec
+              <Mail className="w-4 h-4" /> soporte@veris.med.ec
             </a>
             <span className="text-foreground/30">|</span>
             <span className="text-foreground flex items-center gap-1">
-              📞 1800-VERIS-ONLINE
+              <Phone className="w-4 h-4" /> 1800-VERIS-ONLINE
             </span>
           </div>
         </div>

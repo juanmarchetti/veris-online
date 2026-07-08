@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { simularPagoAprobado, simularPagoRechazado } from './actions'
+import { CheckCircle2, Clock } from 'lucide-react'
 
 type Props = {
   idCita: string
@@ -150,14 +151,14 @@ export default function PagoSimulador({
           {/* Estado actual */}
           {estadoPago === 'aprobado' && (
             <div className="bg-green-50 text-green-700 p-6 rounded-xl text-center font-bold border border-green-200">
-              <div className="text-4xl mb-3">✅</div>
+              <div className="flex justify-center mb-3 text-green-600"><CheckCircle2 className="w-12 h-12" /></div>
               Pago aprobado. Tu cita está confirmada.
             </div>
           )}
           
           {estadoPago === 'expirado' && (
             <div className="bg-red-50 text-red-600 p-6 rounded-xl text-center font-bold border border-red-200">
-              <div className="text-4xl mb-3">⏰</div>
+              <div className="flex justify-center mb-3 text-red-600"><Clock className="w-12 h-12" /></div>
               El plazo expiró. Cita cancelada.
             </div>
           )}
@@ -207,7 +208,7 @@ export default function PagoSimulador({
 
           {expirado && estadoPago === 'pendiente' && (
              <div className="bg-red-50 text-red-600 p-6 rounded-xl text-center font-bold border border-red-200">
-             <div className="text-4xl mb-3">⏰</div>
+             <div className="flex justify-center mb-3 text-red-600"><Clock className="w-12 h-12" /></div>
              El plazo expiró. Cita cancelada automáticamente.
            </div>
           )}

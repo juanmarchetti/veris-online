@@ -12,6 +12,7 @@ type CitaRespuesta = {
   especialidades: { nombre: string } | null
   medicos: { nombre_completo: string } | null
 }
+import { AlertTriangle } from 'lucide-react'
 
 // Colores para cada estado de cita
 function badgeEstado(estado: string) {
@@ -111,8 +112,11 @@ export default async function MisCitasPage() {
                     </span>
                   </div>
                   {cita.requiere_valoracion_presencial && (
-                    <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-2 rounded-md border border-red-200 dark:border-red-800 text-xs mt-1">
-                      ⚠️ <strong>Atención:</strong> Sus síntomas persisten o requieren valoración presencial. Por favor acuda a la clínica más cercana.
+                    <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md border border-red-200 dark:border-red-800 text-xs mt-1 flex gap-2 items-start">
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <strong>Atención:</strong> Sus síntomas persisten o requieren valoración presencial. Por favor acuda a la clínica más cercana.
+                      </div>
                     </div>
                   )}
                 </div>

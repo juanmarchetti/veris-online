@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function RegistroPage() {
   const router = useRouter();
@@ -188,7 +189,7 @@ export default function RegistroPage() {
                   style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--outline)', padding: '0.25rem' }}
                   aria-label="Mostrar/ocultar contraseña"
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -213,7 +214,7 @@ export default function RegistroPage() {
                   style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--outline)', padding: '0.25rem' }}
                   aria-label="Mostrar/ocultar confirmar contraseña"
                 >
-                  {showConfirm ? '🙈' : '👁️'}
+                  {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>

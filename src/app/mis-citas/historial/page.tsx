@@ -2,6 +2,7 @@ import { verificarUsuario } from '@/utils/auth'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
+import { FileText } from 'lucide-react'
 
 export default async function HistorialClinicoPage() {
   const { error, status, user } = await verificarUsuario(['paciente'])
@@ -122,7 +123,7 @@ type HistorialRegistro = {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-secondary/10 text-secondary px-4 py-2 rounded-md text-sm font-semibold hover:bg-secondary/20 transition-colors"
                     >
-                      📄 Ver {doc.tipo_documento.replace('_', ' ')}
+                      <FileText className="w-4 h-4" /> Ver {doc.tipo_documento.replace('_', ' ')}
                     </a>
                   )}
                 </div>
