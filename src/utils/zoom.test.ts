@@ -19,7 +19,7 @@ describe('generarEnlaceZoom', () => {
   it('retorna un enlace mock explícito cuando ZOOM_ENABLED no es "true"', async () => {
     delete process.env.ZOOM_ENABLED
     
-    const link = await generarEnlaceZoom('abc-123', new Date(), 'General')
+    const link = await generarEnlaceZoom('abc-123', new Date(), 'General', 60)
     
     expect(link).toBe('https://veris.example/mock-meeting/abc-123')
     expect(mockFetch).not.toHaveBeenCalled()
@@ -29,7 +29,7 @@ describe('generarEnlaceZoom', () => {
     process.env.ZOOM_ENABLED = 'true'
     mockFetch.mockResolvedValueOnce({ ok: false, status: 401 })
 
-    await expect(generarEnlaceZoom('abc-123', new Date(), 'General')).rejects.toThrow(ZoomApiError)
+    await expect(generarEnlaceZoom('abc-123', new Date(), 'General', 30)).rejects.toThrow(ZoomApiError)
   })
 
   it('usa la API de Zoom y cachea el token', async () => {
@@ -46,10 +46,14 @@ describe('generarEnlaceZoom', () => {
       json: async () => ({ join_url: 'https://zoom.us/j/real123' })
     })
 
-    const link1 = await generarEnlaceZoom('abc-123', new Date(), 'General')
+    const link1 = await generarEnlaceZoom('abc-123', new Date(), 'General', 45)
     
     expect(link1).toBe('https://zoom.us/j/real123')
     expect(mockFetch).toHaveBeenCalledTimes(2)
+    
+    // Verify that the body sent contains duration: 45
+    const fetchCallBody = JSON.parse(mockFetch.mock.calls[1][1].body)
+    expect(fetchCallBody.duration).toBe(45)
 
     // Segunda llamada debe reusar el token
     mockFetch.mockResolvedValueOnce({
@@ -57,7 +61,7 @@ describe('generarEnlaceZoom', () => {
       json: async () => ({ join_url: 'https://zoom.us/j/real456' })
     })
 
-    const link2 = await generarEnlaceZoom('abc-123', new Date(), 'General')
+    const link2 = await generarEnlaceZoom('abc-123', new Date(), 'General', 90)
     expect(link2).toBe('https://zoom.us/j/real456')
     expect(mockFetch).toHaveBeenCalledTimes(3) // 2 de antes + 1 nueva para meeting (token cacheado)
     
@@ -80,7 +84,7 @@ describe('generarEnlaceZoom', () => {
       text: async () => 'Bad Request'
     })
 
-    await expect(generarEnlaceZoom('abc-123', new Date(), 'General')).rejects.toThrow(ZoomApiError)
+    await expect(generarEnlaceZoom('abc-123', new Date(), 'General', 30)).rejects.toThrow(ZoomApiError)
     
     delete process.env.ZOOM_ENABLED
   })

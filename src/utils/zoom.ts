@@ -30,7 +30,8 @@ export class ZoomApiError extends Error {}
 export async function generarEnlaceZoom(
   idCita: string,
   fechaHora: string | Date,
-  motivo: string
+  motivo: string,
+  duracionMinutos: number
 ): Promise<string> {
   const zoomHabilitado = process.env.ZOOM_ENABLED === "true";
 
@@ -52,7 +53,7 @@ export async function generarEnlaceZoom(
       topic: `Consulta Veris — ${motivo}`,
       type: 2, // scheduled meeting
       start_time: fechaIso,
-      duration: 30,
+      duration: duracionMinutos,
       settings: { join_before_host: true, waiting_room: false },
     }),
   });

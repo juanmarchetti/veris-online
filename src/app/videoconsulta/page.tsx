@@ -44,6 +44,7 @@ export default async function VideoconsultaPage({
       estado,
       fecha_hora,
       enlace_zoom,
+      duracion_minutos,
       especialidades ( nombre ),
       pacientes ( id_auth_user ),
       medicos ( id_auth_user )
@@ -125,7 +126,8 @@ export default async function VideoconsultaPage({
       const enlaceGenerado = await generarEnlaceZoom(
         cita.id,
         fechaHora,
-        especialidad
+        especialidad,
+        cita.duracion_minutos || 30
       )
 
       // Usar la RPC para escritura atómica

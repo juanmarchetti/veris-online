@@ -24,7 +24,7 @@ export default function AyudaPage() {
             </h2>
             <p className="text-foreground/80 leading-relaxed text-sm">
               Ve a la sección <strong>Mis citas</strong>. Si tu cita está confirmada y faltan menos de 3 minutos para la hora agendada, 
-              aparecerá el botón <em>"Conectarse a Zoom"</em>. Al hacer clic, se abrirá la sala de espera virtual.
+              aparecerá el botón <em>&quot;Conectarse a Zoom&quot;</em>. Al hacer clic, se abrirá la sala de espera virtual.
             </p>
           </section>
 

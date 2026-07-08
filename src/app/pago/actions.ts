@@ -15,7 +15,7 @@ export async function simularPagoAprobado(idCita: string) {
   // Obtener datos de la cita para Zoom y Resend
   const { data: cita } = await supabase
     .from('citas')
-    .select('fecha_hora, motivo_consulta')
+    .select('fecha_hora, motivo_consulta, duracion_minutos')
     .eq('id', idCita)
     .single()
 
@@ -23,7 +23,7 @@ export async function simularPagoAprobado(idCita: string) {
   if (cita) {
     try {
       const { generarEnlaceZoom } = await import('@/utils/zoom')
-      enlaceZoom = await generarEnlaceZoom(idCita, cita.fecha_hora, cita.motivo_consulta)
+      enlaceZoom = await generarEnlaceZoom(idCita, cita.fecha_hora, cita.motivo_consulta, cita.duracion_minutos || 30)
     } catch (err) {
       console.error('No se pudo generar el enlace de Zoom al aprobar el pago:', err)
       enlaceZoom = null // se generará de forma perezosa en /videoconsulta
