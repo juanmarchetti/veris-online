@@ -11,8 +11,7 @@ type Props = {
     rol: string
     nombre: string
     avatar_url: string
-  }
-  configuracionAdmin: Record<string, unknown> | null
+  configuracionAdmin: Record<string, any> | null
 }
 
 export default function ProfileClient({ user, configuracionAdmin }: Props) {
