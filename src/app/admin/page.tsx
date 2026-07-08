@@ -47,8 +47,8 @@ export default async function AdminPage() {
   const ROLES_PERSONAL: string[] = ['medico', 'agente_cc', 'admin']
 
   const [
-    { data: authUsersData },
-    { data: perfilesPersonal },
+    { data: authUsersData, error: authError },
+    { data: perfilesPersonal, error: perfilesError },
     { data: especialidades },
     { data: conveniosData },
     { data: especialidadesConPrecio },
@@ -60,6 +60,22 @@ export default async function AdminPage() {
     adminClient.from('convenios').select('id, nombre_aseguradora').order('nombre_aseguradora'),
     adminClient.from('especialidades').select('id, nombre, precio_base').order('nombre'),
   ])
+
+  if (perfilesError || authError) {
+    return (
+      <main style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+        <div className="card" style={{ padding: '2.5rem', textAlign: 'center', maxWidth: 600 }}>
+          <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--error)', marginBottom: '0.75rem' }}>Error del Admin Client</h1>
+          <p style={{ color: 'var(--on-surface-variant)', fontSize: '14px', marginBottom: '1rem' }}>
+            Hubo un error al conectar con Supabase usando la llave Service Role.
+          </p>
+          <pre style={{ textAlign: 'left', background: '#f8d7da', padding: '1rem', borderRadius: '8px', fontSize: '12px', overflow: 'auto' }}>
+            {JSON.stringify({ perfilesError, authError }, null, 2)}
+          </pre>
+        </div>
+      </main>
+    )
+  }
 
   // Mapa de Auth users para obtener email: id -> email
   const emailMap = new Map<string, string>(
