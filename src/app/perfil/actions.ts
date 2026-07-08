@@ -16,9 +16,16 @@ export async function actualizarAvatar(formData: FormData) {
     const fileExt = file.name.split('.').pop()
     const fileName = `${user.id}-${Math.random()}.${fileExt}`
     
+    // Convertir File a Buffer para que Supabase Storage lo procese correctamente en el servidor
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+
     const { error: uploadError } = await supabase.storage
       .from('avatars')
-      .upload(fileName, file, { upsert: true })
+      .upload(fileName, buffer, { 
+        upsert: true,
+        contentType: file.type
+      })
 
     if (uploadError) throw uploadError
 
