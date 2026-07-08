@@ -43,8 +43,8 @@ export async function crearCita(formData: FormData) {
   const errorHora = validarHoraCita(hora)
   if (errorHora) return { error: errorHora }
 
-  // Construir fecha_hora en formato ISO
-  const fecha_hora = new Date(`${fecha}T${hora}:00`)
+  // Construir fecha_hora asumiendo la zona horaria de Ecuador (UTC-5)
+  const fecha_hora = new Date(`${fecha}T${hora}:00-05:00`)
 
   if (isNaN(fecha_hora.getTime())) {
     return { error: 'La fecha u hora seleccionada no es válida.' }
