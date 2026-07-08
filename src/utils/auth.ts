@@ -15,13 +15,16 @@ export async function verificarUsuario(requiredRoles: Role[]) {
   }
 
   // Obtener el rol y estado del usuario desde la tabla perfiles
+  // Usamos select('*') en lugar de select('rol, activo') para que no falle 
+  // en ambientes donde la migración 0011 (columna activo) aún no se ha aplicado.
   const { data: perfil, error: perfilError } = await supabase
     .from('perfiles')
-    .select('rol, activo')
+    .select('*')
     .eq('id', user.id)
     .single()
 
   if (perfilError || !perfil) {
+    console.error('Error fetching perfil:', perfilError)
     return { error: 'Perfil no encontrado', status: 403 }
   }
 

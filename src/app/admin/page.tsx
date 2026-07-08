@@ -21,7 +21,7 @@ export default async function AdminPage() {
       <main style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div className="card" style={{ padding: '2.5rem', textAlign: 'center', maxWidth: 400 }}>
           <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--error)', marginBottom: '0.75rem' }}>Acceso Denegado</h1>
-          <p style={{ color: 'var(--on-surface-variant)', fontSize: '14px' }}>No tienes permisos de administrador.</p>
+          <p style={{ color: 'var(--on-surface-variant)', fontSize: '14px' }}>{error}</p>
         </div>
       </main>
     )

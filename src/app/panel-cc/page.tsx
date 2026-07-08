@@ -164,7 +164,10 @@ export default async function PanelCCPage({ searchParams }: { searchParams: Sear
                       <p className="text-sm text-foreground/60">{cita.pacientes.telefono}</p>
                     )}
                     {cita.pacientes && !cita.pacientes.historial_clinico_veris && (
-                      <form action={marcarHistorialClinicoRegistrado.bind(null, cita.pacientes.id)} className="mt-2">
+                      <form action={async () => {
+                        'use server';
+                        await marcarHistorialClinicoRegistrado(cita.pacientes!.id);
+                      }} className="mt-2">
                         <button type="submit" className="text-xs bg-yellow-100 text-yellow-800 border border-yellow-300 px-2 py-1 rounded hover:bg-yellow-200">
                           Marcar Historial Registrado
                         </button>
