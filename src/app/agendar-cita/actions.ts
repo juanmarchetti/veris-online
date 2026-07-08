@@ -38,7 +38,7 @@ export async function crearCita(formData: FormData) {
     return { error: 'Todos los campos obligatorios deben ser completados.' }
   }
 
-  const { validarHoraCita, validarDiaCita, validarFechaFutura } = await import('@/utils/validaciones-cita')
+  const { validarHoraCita, validarFechaFutura } = await import('@/utils/validaciones-cita')
 
   const errorHora = validarHoraCita(hora)
   if (errorHora) return { error: errorHora }
@@ -52,9 +52,6 @@ export async function crearCita(formData: FormData) {
 
   const errorFutura = validarFechaFutura(fecha_hora)
   if (errorFutura) return { error: errorFutura }
-
-  const errorDia = validarDiaCita(fecha_hora)
-  if (errorDia) return { error: errorDia }
 
   // Extraer precio base de la especialidad
   const { data: especialidad, error: espError } = await supabase

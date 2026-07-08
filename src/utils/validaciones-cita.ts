@@ -19,24 +19,10 @@ export function validarHoraCita(hora: string): string | null {
 
   if (isNaN(hour) || isNaN(minutes)) return 'Formato de hora inválido.'
 
-  if (hour < 8 || (hour === 17 && minutes > 30) || hour > 17) {
-    return 'La hora seleccionada está fuera del horario de atención (08:00 a 17:30).'
-  }
-
   if (minutes !== 0 && minutes !== 30) {
     return 'Las citas deben agendarse en bloques de 30 minutos (ej. 08:00, 08:30).'
   }
 
-  return null
-}
-
-/**
- * Valida que la fecha no sea domingo.
- */
-export function validarDiaCita(fecha: Date): string | null {
-  if (fecha.getDay() === 0) {
-    return 'No se pueden agendar citas en domingo.'
-  }
   return null
 }
 
