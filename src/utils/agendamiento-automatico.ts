@@ -57,6 +57,18 @@ const DIAS_FALLBACK   = 14       // días a buscar automáticamente si no hay cu
 const TZ_OFFSET_MS    = 5 * 60 * 60 * 1000  // UTC-5 (Ecuador)
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
+
+/**
+ * Formatea una fecha UTC a la hora de Ecuador ('HH:mm')
+ * Evita problemas de zona horaria si el servidor corre en UTC (ej. Netlify/Vercel)
+ */
+function formatearHoraEcuador(fechaUtc: Date): string {
+  // Restamos 5 horas al timestamp UTC puro
+  const ecuadorDate = new Date(fechaUtc.getTime() - 5 * 60 * 60 * 1000)
+  const hh = ecuadorDate.getUTCHours().toString().padStart(2, '0')
+  const mm = ecuadorDate.getUTCMinutes().toString().padStart(2, '0')
+  return `${hh}:${mm}`
+}
 /**
  * Dado un médico y una fecha ISO (YYYY-MM-DD), devuelve el array de slots
  * candidatos en esa fecha. Cada slot es la Date de inicio en UTC para que
@@ -157,8 +169,8 @@ async function buscarSlotParaMedico(
       if (!tieneConflicto(slotInicio, slotFin, citasOcupadas)) {
         return {
           date: fechaISO,
-          startTime: format(slotInicio, 'HH:mm'),
-          endTime:   format(slotFin,   'HH:mm'),
+          startTime: formatearHoraEcuador(slotInicio),
+          endTime:   formatearHoraEcuador(slotFin),
           doctorId:  medico.id,
           esAlternativa,
         }
