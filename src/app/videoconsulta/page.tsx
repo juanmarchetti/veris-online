@@ -156,10 +156,10 @@ export default async function VideoconsultaPage({
       }
 
       enlaceFinal = enlaceRPC as string
-    } catch (err) {
+    } catch (err: any) {
       const mensaje = err instanceof ZoomApiError 
         ? err.message 
-        : 'Ocurrió un error inesperado al intentar generar la reunión.'
+        : \`Ocurrió un error inesperado al intentar generar la reunión. Detalle: \${err.message || err}\`
         
       return (
         <main className="flex min-h-screen flex-col items-center justify-center p-6">
