@@ -41,6 +41,23 @@ export default function RegistroPage() {
     }
 
     try {
+      // 1. Pre-validación: Revisar si el número de identificación o correo ya existen
+      const { data: existingUser } = await supabase
+        .from('pacientes')
+        .select('correo, numero_identificacion')
+        .or(`correo.eq.${correo},numero_identificacion.eq.${numero_identificacion}`)
+        .limit(1)
+        .maybeSingle();
+        
+      if (existingUser) {
+        if (existingUser.numero_identificacion === numero_identificacion) {
+          throw new Error('Este número de identificación ya se encuentra registrado. Si es tuyo, contacta a soporte.');
+        }
+        if (existingUser.correo === correo) {
+          throw new Error('Este correo ya está registrado. Por favor, inicia sesión.');
+        }
+      }
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: correo,
         password,
