@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { addMinutes, format, isSameDay, parseISO, startOfDay, endOfDay, isBefore, isAfter, isEqual } from 'date-fns'
 
 
 export async function crearCita(formData: FormData) {
@@ -35,6 +36,7 @@ export async function crearCita(formData: FormData) {
   const motivo_consulta = formData.get('motivo_consulta') as string
   const fecha = formData.get('fecha') as string
   const hora = formData.get('hora') as string
+  const duracion_minutos = parseInt(formData.get('duracion_minutos') as string) || 60
 
   if (!id_especialidad || !id_medico || !motivo_consulta || !fecha || !hora) {
     return { error: 'Todos los campos obligatorios deben ser completados.' }
@@ -68,7 +70,12 @@ export async function crearCita(formData: FormData) {
   if (espError || !especialidad) {
     return { error: 'Especialidad no encontrada.' }
   }
-  const montoConsulta = especialidad.precio_base || 25.00
+  const precioBaseHora = especialidad.precio_base || 25.00
+  const montoConsulta = (precioBaseHora / 60) * duracion_minutos
+
+  // TODO: Agregar validación de conflicto en servidor para prevenir dobles reservas
+  // ... (el conflicto real a nivel BD requeriría una constraint temporal sofisticada,
+  // pero lo haremos en getDisponibilidadMedico en el cliente para UX por ahora).
 
   // 4. Insertar cita
   const { data: cita, error: citaError } = await supabase
@@ -80,6 +87,7 @@ export async function crearCita(formData: FormData) {
       id_convenio: id_convenio || null,
       fecha_hora: fecha_hora.toISOString(),
       motivo_consulta,
+      duracion_minutos,
       estado: 'pendiente_pago',
       canal_origen: 'Web'
     })
@@ -113,4 +121,82 @@ export async function crearCita(formData: FormData) {
 
   // 6. Redirigir al pago
   redirect(`/pago?cita=${cita.id}`)
+}
+
+export async function getDisponibilidadMedico(id_medico: string, fechaISO: string, duracionSeleccionada: number) {
+  const supabase = await createClient()
+
+  // 1. Obtener horario del médico
+  const { data: medico } = await supabase
+    .from('medicos')
+    .select('dias_laborables, hora_entrada, hora_salida')
+    .eq('id', id_medico)
+    .single()
+
+  if (!medico) return { error: 'Médico no encontrado' }
+
+  const fechaSeleccionada = new Date(fechaISO)
+  const dayOfWeek = fechaSeleccionada.getDay() // 0 = Domingo, 1 = Lunes...
+
+  // Si el médico no trabaja este día
+  if (!medico.dias_laborables.includes(dayOfWeek)) {
+    return { slots: [] }
+  }
+
+  // 2. Obtener todas las citas del médico en ese día (que no estén canceladas)
+  const inicioDia = startOfDay(fechaSeleccionada).toISOString()
+  const finDia = endOfDay(fechaSeleccionada).toISOString()
+
+  const { data: citas } = await supabase
+    .from('citas')
+    .select('fecha_hora, duracion_minutos')
+    .eq('id_medico', id_medico)
+    .neq('estado', 'cancelada')
+    .gte('fecha_hora', inicioDia)
+    .lte('fecha_hora', finDia)
+
+  const citasDelDia = (citas || []).map(c => ({
+    inicio: new Date(c.fecha_hora),
+    fin: addMinutes(new Date(c.fecha_hora), c.duracion_minutos + 30) // +30 mins de descanso
+  }))
+
+  // 3. Generar slots posibles
+  const [horaEnt, minEnt] = medico.hora_entrada.split(':').map(Number)
+  const [horaSal, minSal] = medico.hora_salida.split(':').map(Number)
+  
+  let currentSlot = new Date(fechaSeleccionada)
+  currentSlot.setHours(horaEnt, minEnt, 0, 0)
+  
+  const finJornada = new Date(fechaSeleccionada)
+  finJornada.setHours(horaSal, minSal, 0, 0)
+
+  const ahora = new Date()
+  const availableSlots: string[] = []
+
+  while (currentSlot < finJornada) {
+    const slotFin = addMinutes(currentSlot, duracionSeleccionada)
+    
+    // El slot propuesto excede el horario de salida
+    if (isAfter(slotFin, finJornada)) break
+
+    // No permitir agendar en el pasado
+    if (isBefore(currentSlot, ahora) || isEqual(currentSlot, ahora)) {
+      currentSlot = addMinutes(currentSlot, 30)
+      continue
+    }
+
+    // Verificar colisión con alguna cita existente
+    const hasConflict = citasDelDia.some(cita => {
+      // Conflicto si los intervalos se superponen: Slot empieza antes del fin de la cita Y slot termina después del inicio de la cita
+      return isBefore(currentSlot, cita.fin) && isAfter(slotFin, cita.inicio)
+    })
+
+    if (!hasConflict) {
+      availableSlots.push(format(currentSlot, 'HH:mm'))
+    }
+    
+    currentSlot = addMinutes(currentSlot, 30)
+  }
+
+  return { slots: availableSlots }
 }

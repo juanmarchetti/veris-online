@@ -14,6 +14,7 @@ export default function AccionesCitaMedico({ idCita, estado }: Props) {
   
   // Para finalizar cita
   const [requiereValoracion, setRequiereValoracion] = useState(false)
+  const [informeMedico, setInformeMedico] = useState('')
   
   // Para documento
   const [tipoDoc, setTipoDoc] = useState('receta')
@@ -29,7 +30,7 @@ export default function AccionesCitaMedico({ idCita, estado }: Props) {
   const handleFinalizar = (e: React.FormEvent) => {
     e.preventDefault()
     startTransition(async () => {
-      const res = await finalizarCita(idCita, requiereValoracion)
+      const res = await finalizarCita(idCita, requiereValoracion, informeMedico)
       if (res.error) setMensaje({ ok: false, texto: res.error })
       else setMensaje({ ok: true, texto: 'Cita finalizada.' })
     })
@@ -97,7 +98,15 @@ export default function AccionesCitaMedico({ idCita, estado }: Props) {
 
           <form onSubmit={handleFinalizar} className="bg-surface p-3 rounded border text-sm flex flex-col gap-2">
             <h4 className="font-bold">Finalizar Consulta</h4>
-            <label className="flex items-center gap-2">
+            <textarea
+              placeholder="Informe de síntomas y diagnóstico del paciente..."
+              required
+              rows={4}
+              value={informeMedico}
+              onChange={e => setInformeMedico(e.target.value)}
+              className="border p-2 rounded resize-none"
+            />
+            <label className="flex items-center gap-2 mt-2">
               <input 
                 type="checkbox" 
                 checked={requiereValoracion} 

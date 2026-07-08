@@ -11,6 +11,7 @@ import { verificarUsuario } from '@/utils/auth'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import AccionesCitaMedico from './AccionesCitaMedico'
+import ConfiguracionHorario from './ConfiguracionHorario'
 import Link from 'next/link'
 
 // Forzar renderizado dinámico: esta página requiere cookies de sesión en cada request.
@@ -75,7 +76,7 @@ export default async function PanelMedicoPage() {
   // ha completado el perfil médico desde el panel de gestión de usuarios.
   const { data: medico } = await supabase
     .from('medicos')
-    .select('id, nombre_completo, especialidades(nombre)')
+    .select('id, nombre_completo, hora_entrada, hora_salida, dias_laborables, especialidades(nombre)')
     .eq('id_auth_user', user!.id)
     .maybeSingle()
 
@@ -124,6 +125,14 @@ export default async function PanelMedicoPage() {
           {especialidadMedico ? ` — ${especialidadMedico}` : ''}
         </p>
       </div>
+
+      <ConfiguracionHorario 
+        horarioInicial={{ 
+          hora_entrada: medico.hora_entrada || '08:00',
+          hora_salida: medico.hora_salida || '17:00',
+          dias_laborables: medico.dias_laborables || [1,2,3,4,5] 
+        }} 
+      />
 
       <h2 className="text-xl font-semibold mb-4">Mis citas asignadas</h2>
 

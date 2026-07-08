@@ -33,7 +33,7 @@ export async function marcarCitaEnCurso(idCita: string) {
   return { success: true }
 }
 
-export async function finalizarCita(idCita: string, requiereValoracion: boolean) {
+export async function finalizarCita(idCita: string, requiereValoracion: boolean, informeMedico?: string) {
   const { error: authError, user } = await verificarUsuario(['medico'])
   if (authError || !user) return { error: 'No autorizado.' }
 
@@ -48,18 +48,32 @@ export async function finalizarCita(idCita: string, requiereValoracion: boolean)
   
   if (!medico) return { error: 'Perfil médico no encontrado.' }
 
+  const updateData: any = {
+    estado: 'finalizada',
+    requiere_valoracion_presencial: requiereValoracion
+  }
+  
+  if (informeMedico) {
+    updateData.informe_medico = informeMedico
+  }
+
   const { data, error } = await supabase
     .from('citas')
-    .update({
-      estado: 'finalizada',
-      requiere_valoracion_presencial: requiereValoracion
-    })
+    .update(updateData)
     .eq('id', idCita)
     .eq('id_medico', medico.id)
     .select()
 
   if (error) return { error: error.message }
   if (!data || data.length === 0) return { error: 'No se pudo actualizar. La cita no existe o no te pertenece.' }
+  
+  // Create historial_clinico record if there's a report
+  if (informeMedico) {
+    await supabase.from('historial_clinico').insert({
+      id_paciente: data[0].id_paciente,
+      tipo_registro: 'Informe de Teleconsulta',
+    })
+  }
   
   revalidatePath('/panel-medico')
   return { success: true }
@@ -118,4 +132,43 @@ export async function agregarDocumentoClinico(formData: FormData) {
 
   revalidatePath('/panel-medico')
   return { success: true }
+}
+
+export async function actualizarHorarioMedico(formData: FormData) {
+  const supabase = await createClient()
+
+  // 1. Verificar sesión
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return { error: 'No autorizado. Inicia sesión nuevamente.' }
+  }
+
+  // 2. Extraer datos
+  const hora_entrada = formData.get('hora_entrada') as string
+  const hora_salida = formData.get('hora_salida') as string
+  const diasRaw = formData.get('dias_laborables') as string
+  
+  if (!hora_entrada || !hora_salida || !diasRaw) {
+    return { error: 'Faltan datos requeridos.' }
+  }
+
+  let dias_laborables: number[]
+  try {
+    dias_laborables = JSON.parse(diasRaw)
+  } catch (e) {
+    return { error: 'Formato de días inválido.' }
+  }
+
+  // 3. Actualizar la base de datos
+  const { error: updateError } = await supabase
+    .from('medicos')
+    .update({ hora_entrada, hora_salida, dias_laborables })
+    .eq('id_auth_user', user.id)
+
+  if (updateError) {
+    return { error: 'Error al actualizar el horario: ' + updateError.message }
+  }
+
+  revalidatePath('/panel-medico')
+  return { ok: true }
 }
