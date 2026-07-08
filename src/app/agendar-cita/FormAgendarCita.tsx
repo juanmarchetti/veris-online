@@ -111,15 +111,6 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
 
   return (
     <>
-      {/* RF-02.6: Aviso de historial clínico */}
-      {!tieneHistorialClinico && (
-        <div className="w-full bg-amber-50 border border-amber-300 text-amber-800 p-4 rounded-lg mb-6 text-sm">
-          <strong>⚠️ Aviso importante:</strong> No tienes historial clínico registrado en Veris.
-          Antes de que tu cita pueda ser confirmada, debes comunicarte al Contact Center al{' '}
-          <strong>6009600</strong> para registrar tus datos clínicos.
-        </div>
-      )}
-
       {error && <div className="w-full bg-red-50 text-red-600 p-4 rounded-md mb-6 text-sm">{error}</div>}
 
       <form onSubmit={handleSubmit} className="card flex flex-col gap-6" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>

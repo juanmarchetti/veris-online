@@ -25,10 +25,6 @@ export async function crearCita(formData: FormData) {
     return { error: 'No se encontró tu perfil de paciente.' }
   }
 
-  if (!paciente.historial_clinico_veris) {
-    return { error: 'Debes comunicarte al Contact Center (6009600) para registrar tu historial clínico antes de poder agendar.' }
-  }
-
   // 3. Extraer y validar datos del formulario
   const id_especialidad = formData.get('id_especialidad') as string
   const id_medico = formData.get('id_medico') as string

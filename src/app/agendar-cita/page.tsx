@@ -26,7 +26,7 @@ export default async function AgendarCitaPage() {
     { data: paciente }
   ] = await Promise.all([
     supabase.from('especialidades').select('id, nombre').order('nombre'),
-    supabase.from('medicos').select('id, nombre_completo, id_especialidad').order('nombre_completo'),
+    supabase.from('medicos').select('id, nombre_completo, id_especialidad').not('id_auth_user', 'is', null).order('nombre_completo'),
     supabase.from('convenios').select('id, nombre_aseguradora').order('nombre_aseguradora'),
     supabase.from('pacientes').select('historial_clinico_veris').eq('id_auth_user', user!.id).single()
   ])
