@@ -88,11 +88,14 @@ export async function enviarCorreoDocumentoClinico(idDocumento: string) {
 
     if (!doc) throw new Error('Documento no encontrado');
 
-    const cita = doc.citas as unknown as { pacientes: any, medicos: any }
+    const cita = doc.citas as unknown as { 
+      pacientes: { correo: string; nombre_completo: string }, 
+      medicos: { nombre_completo: string } 
+    }
     if (!cita) throw new Error('Cita no encontrada para el documento');
 
-    const paciente = cita.pacientes as { correo: string, nombre_completo: string }
-    const medico = cita.medicos as { nombre_completo: string }
+    const paciente = cita.pacientes
+    const medico = cita.medicos
 
     const { Resend } = await import('resend');
     const resend = new Resend(process.env.RESEND_API_KEY);
