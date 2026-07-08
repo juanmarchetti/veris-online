@@ -88,6 +88,19 @@ export async function actualizarRolYPerfil(formData: FormData) {
             medicoError.message,
         }
       }
+    } else {
+      // Si ya existía, actualizamos el nombre y la especialidad por si los cambiaron
+      const { error: medicoError } = await adminClient.from('medicos').update({
+        nombre_completo: nombreMedico.trim(),
+        id_especialidad: idEspecialidad,
+      }).eq('id_auth_user', userId)
+
+      if (medicoError) {
+        return {
+          ok: false,
+          error: 'Error al actualizar los datos del médico: ' + medicoError.message,
+        }
+      }
     }
     // Si ya existía medicoExistente, el rol se actualizó y la fila de médico ya estaba — no se toca.
   }

@@ -52,6 +52,7 @@ export default async function AdminPage() {
     { data: especialidades },
     { data: conveniosData },
     { data: especialidadesConPrecio },
+    { data: medicosData },
   ] = await Promise.all([
     adminClient.auth.admin.listUsers({ perPage: 500 }),
     // Filtrar directamente en BD — fuente de verdad para el listado de personal
@@ -59,6 +60,7 @@ export default async function AdminPage() {
     adminClient.from('especialidades').select('id, nombre').order('nombre'),
     adminClient.from('convenios').select('id, nombre_aseguradora').order('nombre_aseguradora'),
     adminClient.from('especialidades').select('id, nombre, precio_base').order('nombre'),
+    adminClient.from('medicos').select('id_auth_user, nombre_completo, id_especialidad'),
   ])
 
   if (perfilesError || authError) {
@@ -82,15 +84,25 @@ export default async function AdminPage() {
     (authUsersData?.users ?? []).map((u) => [u.id, u.email ?? 'Sin correo'])
   )
 
+  // Mapa de médicos para sacar nombre y especialidad
+  const medicosMap = new Map(
+    (medicosData ?? []).map((m) => [m.id_auth_user, m])
+  )
+
   // Construir la lista de personal a partir de 'perfiles' (siempre confiable)
   // y enriquecer con email si está disponible en Auth.
   type PerfilDB = { id: string; rol: string; activo: boolean | null }
-  const personal: StaffMember[] = (perfilesPersonal as PerfilDB[] ?? []).map((p) => ({
-    id: p.id,
-    email: emailMap.get(p.id) ?? `${p.id.slice(0, 8)}…`,   // fallback si AUTH no responde
-    rol: p.rol,
-    activo: p.activo ?? true,
-  }))
+  const personal: StaffMember[] = (perfilesPersonal as PerfilDB[] ?? []).map((p) => {
+    const medInfo = medicosMap.get(p.id)
+    return {
+      id: p.id,
+      email: emailMap.get(p.id) ?? `${p.id.slice(0, 8)}…`,   // fallback si AUTH no responde
+      rol: p.rol,
+      activo: p.activo ?? true,
+      nombreMedico: medInfo?.nombre_completo,
+      idEspecialidad: medInfo?.id_especialidad,
+    }
+  })
 
   return (
     <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>

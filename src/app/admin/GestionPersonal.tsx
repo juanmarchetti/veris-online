@@ -17,6 +17,8 @@ export type StaffMember = {
   email: string
   rol: string
   activo: boolean
+  nombreMedico?: string
+  idEspecialidad?: string
 }
 
 // ─────────────────────────────────────────────
@@ -320,6 +322,7 @@ function StaffCard({
                 type="text"
                 name="nombreMedico"
                 required
+                defaultValue={member.nombreMedico}
                 placeholder="Dra. María González"
                 className="input-field"
                 style={{ fontSize: '14px', padding: '0.5rem 0.75rem' }}
@@ -330,7 +333,7 @@ function StaffCard({
               <select
                 name="idEspecialidad"
                 required
-                defaultValue=""
+                defaultValue={member.idEspecialidad || ""}
                 className="input-field"
                 style={{ fontSize: '14px', padding: '0.5rem 0.75rem' }}
               >
