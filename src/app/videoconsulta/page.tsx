@@ -102,7 +102,7 @@ export default async function VideoconsultaPage({
           <div className="bg-primary-container/10 p-4 rounded-lg mb-6">
             <p className="text-sm font-semibold text-primary">Hora de la cita:</p>
             <p className="text-lg font-bold">
-              {fechaHora.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' })}
+              {fechaHora.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Guayaquil' })}
             </p>
           </div>
           <button 

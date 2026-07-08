@@ -158,8 +158,9 @@ export default async function PanelMedicoPage() {
                 <p className="text-foreground/60 text-sm">{cita.pacientes?.correo}</p>
                 <p className="text-foreground/70 mt-1">
                   {new Date(cita.fecha_hora).toLocaleString('es-EC', {
-                    dateStyle: 'full',
+                    dateStyle: 'medium',
                     timeStyle: 'short',
+                    timeZone: 'America/Guayaquil'
                   })}
                 </p>
                 <p className="text-sm text-foreground/60 mt-1 italic">{cita.motivo_consulta}</p>

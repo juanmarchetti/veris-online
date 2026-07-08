@@ -103,7 +103,7 @@ export default async function MisCitasPage() {
                 <h3 className="font-bold text-lg">
                   {cita.especialidades?.nombre || 'Especialidad'} - Dr(a). {cita.medicos?.nombre_completo || 'No asignado'}
                 </h3>
-                <p className="text-foreground/70">{new Date(cita.fecha_hora).toLocaleString('es-EC')}</p>
+                <p className="text-foreground/70">{new Date(cita.fecha_hora).toLocaleString('es-EC', { timeZone: 'America/Guayaquil' })}</p>
                 <div className="mt-2 flex flex-col gap-2 text-sm">
                   <div>
                     <span className={`font-semibold px-2 py-1 rounded-md uppercase text-xs tracking-wider ${badgeEstado(cita.estado)}`}>

@@ -66,7 +66,7 @@ export default async function Navbar() {
                 <>
                   <NavLink href="/agendar-cita">Inicio</NavLink>
                   <NavLink href="/mis-citas">Mis citas</NavLink>
-                  <NavLink href="/historial">Historial</NavLink>
+                  <NavLink href="/mis-citas/historial">Historial</NavLink>
                   <NavLink href="/ayuda">Ayuda</NavLink>
                 </>
               )}
