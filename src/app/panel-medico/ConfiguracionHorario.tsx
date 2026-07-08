@@ -20,8 +20,6 @@ const DIAS = [
 ]
 
 export default function ConfiguracionHorario({ horarioInicial }: { horarioInicial: HorarioMedico }) {
-  const [horaEntrada, setHoraEntrada] = useState(horarioInicial.hora_entrada.slice(0, 5))
-  const [horaSalida, setHoraSalida] = useState(horarioInicial.hora_salida.slice(0, 5))
   const [diasLaborables, setDiasLaborables] = useState<number[]>(horarioInicial.dias_laborables)
   const [mensaje, setMensaje] = useState('')
   const [cargando, setCargando] = useState(false)
@@ -34,14 +32,12 @@ export default function ConfiguracionHorario({ horarioInicial }: { horarioInicia
     )
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setCargando(true)
     setMensaje('')
     
-    const formData = new FormData()
-    formData.set('hora_entrada', horaEntrada)
-    formData.set('hora_salida', horaSalida)
+    const formData = new FormData(e.currentTarget)
     formData.set('dias_laborables', JSON.stringify(diasLaborables))
     
     const res = await actualizarHorarioMedico(formData)
@@ -65,9 +61,9 @@ export default function ConfiguracionHorario({ horarioInicial }: { horarioInicia
             <label className="block text-sm font-medium mb-1">Hora de entrada</label>
             <input 
               type="time" 
+              name="hora_entrada"
               required
-              value={horaEntrada}
-              onChange={e => setHoraEntrada(e.target.value)}
+              defaultValue={horarioInicial.hora_entrada.slice(0, 5)}
               className="w-full p-2 border rounded-md"
             />
           </div>
@@ -75,9 +71,9 @@ export default function ConfiguracionHorario({ horarioInicial }: { horarioInicia
             <label className="block text-sm font-medium mb-1">Hora de salida</label>
             <input 
               type="time" 
+              name="hora_salida"
               required
-              value={horaSalida}
-              onChange={e => setHoraSalida(e.target.value)}
+              defaultValue={horarioInicial.hora_salida.slice(0, 5)}
               className="w-full p-2 border rounded-md"
             />
           </div>

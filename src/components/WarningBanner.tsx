@@ -1,7 +1,18 @@
+'use client'
+
 // SRS RF-06.3 [FUENTE]: Advertencia de urgencias — siempre visible en el top de la página.
 // "El sitio debe informar claramente que el servicio no debe usarse en caso de urgencias o emergencias."
 
+import { usePathname } from 'next/navigation'
+
 export default function WarningBanner() {
+  const pathname = usePathname()
+
+  // Ocultar banner en paneles administrativos y de personal
+  if (pathname?.startsWith('/panel-medico') || pathname?.startsWith('/panel-cc') || pathname?.startsWith('/admin')) {
+    return null
+  }
+
   return (
     <div
       style={{
