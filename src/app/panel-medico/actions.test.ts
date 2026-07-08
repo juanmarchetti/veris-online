@@ -32,7 +32,7 @@ describe('panel-medico actions', () => {
   })
 
   it('rechaza si la cita no existe o no pertenece al médico', async () => {
-    vi.mocked(verificarUsuario).mockResolvedValue({ error: undefined, status: 200, user: { id: 'u1' } as any })
+    vi.mocked(verificarUsuario).mockResolvedValue({ error: undefined, user: { id: 'u1' } as any, role: 'medico' as any })
     
     // mock medicos select
     const medicosSelect = {
