@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 
     // ── 5. Bucle FIFO con reintentos anti-race ────────────────────────────
     let slotFinal = null
-    let diasExcluidos: string[] = []
+    const diasExcluidos: string[] = []
     let intento = 0
 
     while (!slotFinal && intento < MAX_REINTENTOS) {

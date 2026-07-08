@@ -12,12 +12,14 @@ export default async function Navbar() {
   const { data: { user } } = await supabase.auth.getUser();
 
   let rol: Role | null = null;
+  let perfil: { rol: string; avatar_url: string | null } | null = null;
   if (user) {
-    const { data: perfil } = await supabase
+    const { data } = await supabase
       .from('perfiles')
-      .select('rol')
+      .select('rol, avatar_url')
       .eq('id', user.id)
       .single();
+    perfil = data;
     rol = (perfil?.rol as Role) ?? null;
   }
 
@@ -86,7 +88,27 @@ export default async function Navbar() {
               {/* Divider visual */}
               <div style={{ width: 1, height: 20, background: 'var(--outline-variant)', margin: '0 0.5rem' }} />
 
-              {/* Avatar placeholder + Logout */}
+              {/* Avatar + Perfil + Logout */}
+              <Link
+                href="/perfil"
+                className="flex items-center gap-2 hover:bg-surface-container rounded-full pr-3 pl-1 py-1 transition-colors"
+                style={{ textDecoration: 'none' }}
+              >
+                {perfil?.avatar_url ? (
+                  <img
+                    src={perfil.avatar_url}
+                    alt="Avatar"
+                    className="w-8 h-8 rounded-full object-cover border border-outline-variant"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary-container text-primary flex items-center justify-center font-bold text-sm">
+                    {user.email?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-sm font-medium text-on-surface-variant max-w-[100px] truncate">
+                  Mi Perfil
+                </span>
+              </Link>
               <LogoutButton />
             </>
           ) : (
