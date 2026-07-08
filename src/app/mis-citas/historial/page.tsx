@@ -2,7 +2,7 @@ import { verificarUsuario } from '@/utils/auth'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import { FileText } from 'lucide-react'
+import { FileText, Download } from 'lucide-react'
 
 export default async function HistorialClinicoPage() {
   const { error, status, user } = await verificarUsuario(['paciente'])
@@ -36,6 +36,14 @@ export default async function HistorialClinicoPage() {
       id,
       tipo_registro,
       fecha,
+      motivo_consulta,
+      sintomas_reportados,
+      diagnostico,
+      tratamiento_indicado,
+      observaciones,
+      requiere_valoracion_presencial,
+      medicos (nombre_completo),
+      citas (fecha_hora, especialidades (nombre)),
       documentos_clinicos (
         id,
         tipo_documento,
@@ -55,6 +63,17 @@ type HistorialRegistro = {
   id: string
   tipo_registro: string
   fecha: string
+  motivo_consulta?: string
+  sintomas_reportados?: string
+  diagnostico?: string
+  tratamiento_indicado?: string
+  observaciones?: string
+  requiere_valoracion_presencial?: boolean
+  medicos?: { nombre_completo: string } | null
+  citas?: { 
+    fecha_hora: string,
+    especialidades?: { nombre: string } | null
+  } | null
   documentos_clinicos?: {
     id: string
     tipo_documento: string
@@ -93,7 +112,12 @@ type HistorialRegistro = {
         <div className="relative border-l border-foreground/20 ml-3 md:ml-6 space-y-8">
           {(historial as unknown as HistorialRegistro[]).map((registro) => {
             const doc = registro.documentos_clinicos
-            const cita = doc?.citas
+            const citaVieja = doc?.citas
+            
+            // Usar la relación directa nueva si existe, o caer a la antigua mediante documentos
+            const nombreMedico = registro.medicos?.nombre_completo || citaVieja?.medicos?.nombre_completo
+            const fechaCita = registro.citas?.fecha_hora || citaVieja?.fecha_hora
+            const especialidad = registro.citas?.especialidades?.nombre || citaVieja?.especialidades?.nombre
 
             return (
               <div key={registro.id} className="pl-6 relative">
@@ -101,30 +125,76 @@ type HistorialRegistro = {
                 <div className="absolute w-3 h-3 bg-primary rounded-full -left-[6.5px] top-1.5 ring-4 ring-background" />
                 
                 <div className="bg-white dark:bg-black/20 p-5 rounded-xl shadow-sm border border-foreground/10">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-lg">{registro.tipo_registro}</h3>
-                    <span className="text-sm text-foreground/50">
-                      {new Date(registro.fecha).toLocaleDateString('es-EC', { dateStyle: 'long' })}
-                    </span>
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="font-bold text-lg text-primary">{registro.tipo_registro}</h3>
+                      <span className="text-sm text-foreground/50">
+                        {new Date(registro.fecha).toLocaleDateString('es-EC', { dateStyle: 'long', timeStyle: 'short' })}
+                      </span>
+                    </div>
+                    {registro.diagnostico && (
+                      <a
+                        href={`/api/diagnostico/${registro.id}/pdf`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 bg-secondary text-on-secondary px-4 py-2 rounded-md text-sm font-bold hover:bg-secondary/90 transition-colors shadow-sm"
+                      >
+                        <Download className="w-4 h-4" /> PDF
+                      </a>
+                    )}
                   </div>
                   
-                  {cita && (
-                    <div className="text-sm text-foreground/70 mb-3 bg-surface p-3 rounded-md">
-                      <p><strong>Cita:</strong> {new Date(cita.fecha_hora).toLocaleString('es-EC')}</p>
-                      <p><strong>Médico:</strong> Dr(a). {cita.medicos?.nombre_completo}</p>
-                      <p><strong>Especialidad:</strong> {cita.especialidades?.nombre}</p>
+                  {fechaCita && (
+                    <div className="text-sm text-foreground/80 mb-4 bg-surface p-3 rounded-lg border border-outline-variant flex flex-col sm:flex-row gap-2 sm:gap-6">
+                      <p><strong>Cita:</strong> {new Date(fechaCita).toLocaleString('es-EC')}</p>
+                      {nombreMedico && <p><strong>Médico:</strong> Dr(a). {nombreMedico}</p>}
+                      {especialidad && <p><strong>Especialidad:</strong> {especialidad}</p>}
+                    </div>
+                  )}
+
+                  {registro.diagnostico && (
+                    <div className="grid gap-3 text-sm">
+                      {registro.sintomas_reportados && (
+                        <div>
+                          <h4 className="font-semibold text-foreground/60 uppercase text-xs">Síntomas</h4>
+                          <p>{registro.sintomas_reportados}</p>
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-semibold text-error uppercase text-xs">Diagnóstico</h4>
+                        <p className="font-medium">{registro.diagnostico}</p>
+                      </div>
+                      {registro.tratamiento_indicado && (
+                        <div>
+                          <h4 className="font-semibold text-foreground/60 uppercase text-xs">Tratamiento</h4>
+                          <p className="whitespace-pre-wrap">{registro.tratamiento_indicado}</p>
+                        </div>
+                      )}
+                      {registro.observaciones && (
+                        <div>
+                          <h4 className="font-semibold text-foreground/60 uppercase text-xs">Observaciones</h4>
+                          <p className="whitespace-pre-wrap">{registro.observaciones}</p>
+                        </div>
+                      )}
+                      {registro.requiere_valoracion_presencial && (
+                        <div className="bg-yellow-100 text-yellow-800 p-2 rounded text-xs font-bold inline-block mt-2">
+                          ⚠️ Requiere valoración médica presencial
+                        </div>
+                      )}
                     </div>
                   )}
 
                   {doc?.url_archivo && (
-                    <a
-                      href={doc.url_archivo}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 bg-secondary/10 text-secondary px-4 py-2 rounded-md text-sm font-semibold hover:bg-secondary/20 transition-colors"
-                    >
-                      <FileText className="w-4 h-4" /> Ver {doc.tipo_documento.replace('_', ' ')}
-                    </a>
+                    <div className="mt-4">
+                      <a
+                        href={doc.url_archivo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 bg-foreground/5 text-foreground px-4 py-2 rounded-md text-sm font-semibold hover:bg-foreground/10 transition-colors"
+                      >
+                        <FileText className="w-4 h-4" /> Ver Documento Adjunto ({doc.tipo_documento.replace('_', ' ')})
+                      </a>
+                    </div>
                   )}
                 </div>
               </div>

@@ -12,6 +12,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import AccionesCitaMedico from './AccionesCitaMedico'
 import ConfiguracionHorario from './ConfiguracionHorario'
+import HistorialConsultas from './HistorialConsultas'
 import Link from 'next/link'
 
 // Forzar renderizado dinámico: esta página requiere cookies de sesión en cada request.
@@ -115,6 +116,28 @@ export default async function PanelMedicoPage() {
   // Casteamos a unknown primero para satisfacer al compilador TS.
   const especialidadMedico = (medico.especialidades as unknown as { nombre: string } | null)?.nombre
 
+  // Obtener el historial de diagnósticos que el médico ha emitido
+  const { data: historialData } = await supabase
+    .from('historial_clinico')
+    .select(`
+      id,
+      fecha,
+      motivo_consulta,
+      sintomas_reportados,
+      diagnostico,
+      tratamiento_indicado,
+      observaciones,
+      requiere_valoracion_presencial,
+      pacientes(nombre_completo)
+    `)
+    .eq('id_medico', medico.id)
+    .order('fecha', { ascending: false })
+
+  const historial = (historialData || []).map((h: any) => ({
+    ...h,
+    paciente_nombre: h.pacientes?.nombre_completo || 'Paciente desconocido'
+  }))
+
   return (
     <main className="flex flex-col p-6 max-w-5xl mx-auto w-full">
       {/* Encabezado con datos del médico */}
@@ -134,7 +157,7 @@ export default async function PanelMedicoPage() {
         }} 
       />
 
-      <h2 className="text-xl font-semibold mb-4">Mis citas asignadas</h2>
+      <h2 className="text-xl font-semibold mb-4 mt-8">Mis citas asignadas</h2>
 
       {citasError ? (
         <div className="bg-red-50 text-red-600 p-4 rounded-md">
@@ -191,6 +214,9 @@ export default async function PanelMedicoPage() {
           ))}
         </div>
       )}
+
+      {/* Importamos y renderizamos el Historial de Consultas */}
+      <HistorialConsultas historial={historial} />
     </main>
   )
 }

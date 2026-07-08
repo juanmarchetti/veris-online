@@ -34,7 +34,18 @@ export async function marcarCitaEnCurso(idCita: string) {
   return { success: true }
 }
 
-export async function finalizarCita(idCita: string, requiereValoracion: boolean, informeMedico?: string) {
+import { enviarCorreoConfirmacion } from '@/utils/resend' // Simularemos o usaremos resend, pero necesitamos crear enviarCorreoDiagnostico. Mejor lo definimos aquí o lo llamamos.
+
+export async function finalizarCitaMedico(
+  idCita: string, 
+  datosDiagnostico: {
+    sintomas_reportados: string,
+    diagnostico: string,
+    tratamiento_indicado: string,
+    observaciones: string,
+    requiere_valoracion_presencial: boolean
+  }
+) {
   const { error: authError, user } = await verificarUsuario(['medico'])
   if (authError || !user) return { error: 'No autorizado.' }
 
@@ -49,33 +60,71 @@ export async function finalizarCita(idCita: string, requiereValoracion: boolean,
   
   if (!medico) return { error: 'Perfil médico no encontrado.' }
 
-  const updateData: any = {
-    estado: 'finalizada',
-    requiere_valoracion_presencial: requiereValoracion
-  }
-  
-  if (informeMedico) {
-    updateData.informe_medico = informeMedico
-  }
-
-  const { data, error } = await supabase
+  // Check cita exists and get patient info for email
+  const { data: cita, error: citaError } = await supabase
     .from('citas')
-    .update(updateData)
+    .select('id, id_paciente, pacientes(correo, nombre_completo)')
     .eq('id', idCita)
     .eq('id_medico', medico.id)
-    .select()
+    .single()
 
-  if (error) return { error: error.message }
-  if (!data || data.length === 0) return { error: 'No se pudo actualizar. La cita no existe o no te pertenece.' }
-  
-  // Create historial_clinico record if there's a report
-  if (informeMedico) {
-    await supabase.from('historial_clinico').insert({
-      id_paciente: data[0].id_paciente,
-      tipo_registro: 'Informe de Teleconsulta',
+  if (citaError || !cita) return { error: 'No se pudo actualizar. La cita no existe o no te pertenece.' }
+
+  // Update cita status
+  const { error: updateError } = await supabase
+    .from('citas')
+    .update({ 
+      estado: 'finalizada',
+      requiere_valoracion_presencial: datosDiagnostico.requiere_valoracion_presencial
     })
-  }
+    .eq('id', idCita)
+
+  if (updateError) return { error: updateError.message }
   
+  // Insert in historial_clinico
+  const { error: historialError } = await supabase.from('historial_clinico').insert({
+    id_paciente: cita.id_paciente,
+    id_medico: medico.id,
+    id_cita: idCita,
+    tipo_registro: 'Diagnóstico de Videoconsulta',
+    sintomas_reportados: datosDiagnostico.sintomas_reportados,
+    diagnostico: datosDiagnostico.diagnostico,
+    tratamiento_indicado: datosDiagnostico.tratamiento_indicado,
+    observaciones: datosDiagnostico.observaciones,
+    requiere_valoracion_presencial: datosDiagnostico.requiere_valoracion_presencial
+  })
+
+  if (historialError) {
+    console.error('Error insertando en historial', historialError)
+    return { error: 'Error al guardar el historial clínico.' }
+  }
+
+  // Notificar al paciente por correo (simulado o real)
+  const isResendEnabled = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== '';
+  if (isResendEnabled) {
+    try {
+      const { Resend } = await import('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const paciente = cita.pacientes as unknown as { correo: string, nombre_completo: string }
+      
+      await resend.emails.send({
+        from: 'Veris Online <onboarding@resend.dev>',
+        to: paciente.correo,
+        subject: 'Diagnóstico de Videoconsulta Disponible',
+        html: `
+          <h1>Diagnóstico de Videoconsulta</h1>
+          <p>Hola ${paciente.nombre_completo},</p>
+          <p>Tu médico ha finalizado la videoconsulta y el diagnóstico ya está disponible en tu portal.</p>
+          <p>Ingresa a <strong>Veris Online -> Mis Citas -> Historial Clínico</strong> para verlo y descargar el PDF.</p>
+          <br/>
+          <p>Gracias por usar Veris Online.</p>
+        `
+      })
+    } catch (e) {
+      console.error('Error enviando correo de diagnóstico:', e)
+    }
+  }
+
   revalidatePath('/panel-medico')
   return { success: true }
 }
