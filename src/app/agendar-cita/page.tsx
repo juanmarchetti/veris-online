@@ -35,8 +35,11 @@ export default async function AgendarCitaPage() {
 
   return (
     <main className="flex flex-col items-center p-6 max-w-3xl mx-auto w-full">
-      <h1 className="text-3xl font-bold text-primary mb-6 text-center">Agendar Videoconsulta</h1>
-      
+      <h1 className="text-3xl font-bold text-primary mb-2 text-center">Agendar Videoconsulta</h1>
+      <p className="text-gray-500 text-sm text-center mb-6">
+        Elige tus días disponibles y el sistema asignará automáticamente el mejor horario libre.
+      </p>
+
       {/* Advertencia Legal Obligatoria */}
       <div className="w-full bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-8 rounded-r-md">
         <h2 className="text-red-800 dark:text-red-300 font-bold text-sm uppercase tracking-wide mb-1">
