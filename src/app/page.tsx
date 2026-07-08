@@ -1,6 +1,27 @@
 import Link from 'next/link';
+import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 
-export default function Home() {
+export default async function Home() {
+  // Redirigir usuarios autenticados a sus respectivos paneles
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: perfil } = await supabase
+      .from('perfiles')
+      .select('rol')
+      .eq('id', user.id)
+      .single();
+
+    if (perfil) {
+      if (perfil.rol === 'admin') redirect('/admin');
+      if (perfil.rol === 'agente_cc') redirect('/panel-cc');
+      if (perfil.rol === 'medico') redirect('/panel-medico');
+      if (perfil.rol === 'paciente') redirect('/mis-citas');
+    }
+  }
+
   return (
     <div className="flex flex-col bg-background text-foreground overflow-x-hidden">
       {/* Sección Principal (Hero) */}
