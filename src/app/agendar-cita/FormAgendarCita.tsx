@@ -83,7 +83,7 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
 
       {error && <div className="w-full bg-red-50 text-red-600 p-4 rounded-md mb-6 text-sm">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="w-full bg-white dark:bg-black/20 p-8 rounded-xl shadow-lg border border-foreground/5 flex flex-col gap-6">
+      <form onSubmit={handleSubmit} className="card flex flex-col gap-6" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
 
         {/* RF-02.2 / RF-06.4: Motivo de consulta con recordatorio */}
         <div>
@@ -93,7 +93,8 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
             rows={3}
             placeholder="Por favor detalla tus síntomas con el mayor detalle posible: cuándo empezaron, frecuencia, intensidad y cualquier otro dato relevante para tu consulta."
             required
-            className="w-full p-3 border rounded-md bg-white dark:bg-black"
+            className="input-field"
+            style={{ width: '100%', minHeight: '100px' }}
           />
         </div>
 
@@ -104,7 +105,8 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
             required
             value={especialidadSeleccionada}
             onChange={(e) => setEspecialidadSeleccionada(e.target.value)}
-            className="w-full p-3 border rounded-md bg-white dark:bg-black"
+            className="input-field"
+            style={{ width: '100%' }}
           >
             <option value="">Selecciona una especialidad</option>
             {especialidades.map(esp => (
@@ -115,7 +117,7 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
 
         <div>
           <label className="text-sm font-medium mb-1 block">Médico *</label>
-          <select name="id_medico" required className="w-full p-3 border rounded-md bg-white dark:bg-black">
+          <select name="id_medico" required className="input-field" style={{ width: '100%' }}>
             <option value="">Selecciona un médico</option>
             {medicosFiltrados.map(med => (
               <option key={med.id} value={med.id}>{med.nombre_completo}</option>
@@ -125,7 +127,7 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
 
         <div>
           <label className="text-sm font-medium mb-1 block">Convenio (Seguro Privado)</label>
-          <select name="id_convenio" className="w-full p-3 border rounded-md bg-white dark:bg-black">
+          <select name="id_convenio" className="input-field" style={{ width: '100%' }}>
             <option value="">Ninguno / Particular</option>
             {convenios.map(conv => (
               <option key={conv.id} value={conv.id}>{conv.nombre_aseguradora}</option>
@@ -141,12 +143,13 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
               name="fecha"
               required
               min={hoy}
-              className="w-full p-3 border rounded-md bg-white dark:bg-black"
+              className="input-field"
+              style={{ width: '100%' }}
             />
           </div>
           <div>
             <label className="text-sm font-medium mb-1 block">Hora *</label>
-            <select name="hora" required className="w-full p-3 border rounded-md bg-white dark:bg-black">
+            <select name="hora" required className="input-field" style={{ width: '100%' }}>
               <option value="">Selecciona una hora</option>
               {horas.map(h => (
                 <option key={h} value={h}>{h}</option>
@@ -159,7 +162,8 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white p-4 rounded-md font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer"
+            className="btn-primary w-full"
+            style={{ padding: '1rem', fontSize: '1.1rem' }}
           >
             {loading ? 'Agendando...' : 'Confirmar y Proceder al Pago'}
           </button>
