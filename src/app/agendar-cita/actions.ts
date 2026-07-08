@@ -170,7 +170,11 @@ export async function getDisponibilidadMedico(id_medico: string, fechaISO: strin
   const finJornada = new Date(fechaSeleccionada)
   finJornada.setHours(horaSal, minSal, 0, 0)
 
-  const ahora = new Date()
+  // Ajustar "ahora" a la zona horaria de Ecuador (UTC-5) 
+  // para que coincida con la representación local de currentSlot
+  const ahoraUTC = new Date()
+  const ahora = new Date(ahoraUTC.getTime() - 5 * 60 * 60 * 1000)
+  
   const availableSlots: string[] = []
 
   while (currentSlot < finJornada) {
