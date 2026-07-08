@@ -245,7 +245,8 @@ export default function PagoSimulador({
                         type="text" 
                         value={cardNumber}
                         onChange={handleCardNumberChange}
-                        className={`input-field pl-10 font-mono ${formErrors.cardNumber ? 'border-red-500 bg-red-50' : ''}`}
+                        className={`input-field font-mono ${formErrors.cardNumber ? 'border-red-500 bg-red-50' : ''}`}
+                        style={{ paddingLeft: '2.5rem' }}
                         placeholder="0000 0000 0000 0000"
                         maxLength={19}
                       />
