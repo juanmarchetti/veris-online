@@ -30,18 +30,15 @@ export default async function AdminPage() {
   const supabase = await createClient()
   const adminClient = createAdminClient()
 
-  // Estadísticas generales — cruzadas con la tabla 'perfiles' para que los
-  // conteos reflejen roles reales, no filas en tablas auxiliares.
+  // Estadísticas generales — usamos adminClient para saltar RLS y contar todo
   const [
     { count: totalPacientes },
     { count: totalMedicos },
     { count: totalCitas }
   ] = await Promise.all([
-    // Pacientes reales: rol = 'paciente' en perfiles
-    supabase.from('perfiles').select('*', { count: 'exact', head: true }).eq('rol', 'paciente'),
-    // Médicos activos: rol = 'medico' Y activo = true en perfiles
-    supabase.from('perfiles').select('*', { count: 'exact', head: true }).eq('rol', 'medico').eq('activo', true),
-    supabase.from('citas').select('*', { count: 'exact', head: true }),
+    adminClient.from('perfiles').select('*', { count: 'exact', head: true }).eq('rol', 'paciente'),
+    adminClient.from('perfiles').select('*', { count: 'exact', head: true }).eq('rol', 'medico').eq('activo', true),
+    adminClient.from('citas').select('*', { count: 'exact', head: true }),
   ])
 
   // Obtener SOLO el personal (médicos, agentes, admins) — NO pacientes.

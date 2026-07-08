@@ -6,8 +6,8 @@ import { type Role } from '@/utils/auth'
 // be used in server-side code (route handlers, server actions) for bypassing RLS.
 export function createAdminClient() {
   return createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY!
   )
 }
 
