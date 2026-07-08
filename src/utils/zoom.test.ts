@@ -21,7 +21,7 @@ describe('generarEnlaceZoom', () => {
     
     const link = await generarEnlaceZoom('abc-123', new Date(), 'General', 60)
     
-    expect(link).toBe('https://veris.example/mock-meeting/abc-123')
+    expect(link).toBe('http://localhost:3000/mock-meeting/abc-123')
     expect(mockFetch).not.toHaveBeenCalled()
   })
 

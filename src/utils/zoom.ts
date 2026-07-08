@@ -38,7 +38,8 @@ export async function generarEnlaceZoom(
   if (!zoomHabilitado) {
     // Caso intencional: feature apagado a propósito. Mock explícito y visible como tal.
     console.info(`[zoom:mock] ZOOM_ENABLED=false, generando enlace simulado para cita ${idCita}`);
-    return `https://veris.example/mock-meeting/${idCita}`;
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.URL || 'http://localhost:3000';
+    return `${baseUrl}/mock-meeting/${idCita}`;
   }
 
   // Caso real: si esto falla, NO debe degradar a un mock silencioso.
