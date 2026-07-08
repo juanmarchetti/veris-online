@@ -11,6 +11,7 @@ type Props = {
     rol: string
     nombre: string
     avatar_url: string
+  }
   configuracionAdmin: Record<string, any> | null
 }
 
