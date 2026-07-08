@@ -69,6 +69,12 @@ export default function FormAgendarCita({ especialidades, medicos, convenios, ti
         }
         setCargandoHoras(false)
       })
+      .catch(err => {
+        if (!active) return
+        setError('Ocurrió un error en el servidor al calcular disponibilidad. Revisa la consola.')
+        setHorasDisponibles([])
+        setCargandoHoras(false)
+      })
 
     return () => { active = false }
   }, [medicoSeleccionado, fecha, duracion])

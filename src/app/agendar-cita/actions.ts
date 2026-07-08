@@ -124,16 +124,19 @@ export async function crearCita(formData: FormData) {
 }
 
 export async function getDisponibilidadMedico(id_medico: string, fechaISO: string, duracionSeleccionada: number) {
-  const supabase = await createClient()
+  // Usar Admin Client para bypass de RLS porque necesitamos ver las citas 
+  // de TODOS los pacientes para poder calcular la disponibilidad del médico.
+  const { createAdminClient } = await import('@/utils/supabase/admin')
+  const supabase = createAdminClient()
 
   // 1. Obtener horario del médico
-  const { data: medico } = await supabase
+  const { data: medico, error: medicoError } = await supabase
     .from('medicos')
     .select('dias_laborables, hora_entrada, hora_salida')
     .eq('id', id_medico)
     .single()
 
-  if (!medico) return { error: 'Médico no encontrado' }
+  if (medicoError || !medico) return { error: 'Médico no encontrado' }
 
   const fechaSeleccionada = new Date(fechaISO)
   const dayOfWeek = fechaSeleccionada.getDay() // 0 = Domingo, 1 = Lunes...
