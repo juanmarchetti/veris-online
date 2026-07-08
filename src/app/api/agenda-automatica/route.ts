@@ -1,4 +1,3 @@
-'use server'
 /**
  * API Route: POST /api/agenda-automatica
  * ============================================================

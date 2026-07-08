@@ -23,7 +23,7 @@
  * ============================================================
  */
 
-import { addMinutes, addDays, startOfDay, endOfDay, isAfter, isBefore, isEqual, format, parseISO } from 'date-fns'
+import { addMinutes, addDays, isAfter, isBefore, isEqual, format, parseISO } from 'date-fns'
 
 // ─── Tipos públicos ───────────────────────────────────────────────────────────
 
@@ -127,22 +127,29 @@ async function buscarSlotParaMedico(
   const ahora = ahoraEcuador()
 
   for (const fechaISO of fechasISO) {
+    // getDay() sobre T12:00:00 local es seguro en cualquier timezone del servidor
     const dayOfWeek = parseISO(`${fechaISO}T12:00:00`).getDay()
 
     // El médico no trabaja este día de la semana → FIFO: pasar al siguiente
     if (!medico.dias_laborables.includes(dayOfWeek)) continue
 
-    // Obtener citas ocupadas del médico en ese día (excluyendo canceladas y expiradas)
-    const inicioDia = startOfDay(parseISO(`${fechaISO}T12:00:00`)).toISOString()
-    const finDia    = endOfDay(parseISO(`${fechaISO}T12:00:00`)).toISOString()
+    // Rango del día en Ecuador (UTC-5): 00:00 → 23:59 hora local
+    // Usamos offset explícito -05:00 para que el servidor en UTC lo maneje bien
+    const inicioDia = `${fechaISO}T00:00:00-05:00`
+    const finDia    = `${fechaISO}T23:59:59-05:00`
 
-    const { data: citas } = await supabase
+    const { data: citas, error: citasErr } = await supabase
       .from('citas')
       .select('fecha_hora, duracion_minutos')
       .eq('id_medico', medico.id)
-      .not('estado', 'in', '("cancelada","pendiente_pago")')
+      // Sintaxis PostgREST correcta para NOT IN: llaves {val1,val2}
+      .not('estado', 'in', '(cancelada,pendiente_pago)')
       .gte('fecha_hora', inicioDia)
       .lte('fecha_hora', finDia)
+
+    if (citasErr) {
+      console.error(`[FIFO] Error consultando citas del médico ${medico.id} en ${fechaISO}:`, citasErr.message)
+    }
 
     const citasOcupadas: CitaOcupada[] = citas ?? []
 
