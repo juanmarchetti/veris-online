@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { verificarUsuario } from '@/utils/auth'
 
@@ -159,8 +160,9 @@ export async function actualizarHorarioMedico(formData: FormData) {
     return { error: 'Formato de días inválido.' }
   }
 
-  // 3. Actualizar la base de datos
-  const { error: updateError } = await supabase
+  // 3. Actualizar la base de datos (Usando Admin Client para saltar RLS en catálogos)
+  const adminClient = createAdminClient()
+  const { error: updateError } = await adminClient
     .from('medicos')
     .update({ hora_entrada, hora_salida, dias_laborables })
     .eq('id_auth_user', user.id)
