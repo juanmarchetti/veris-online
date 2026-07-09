@@ -18,7 +18,7 @@ describe('agendar-cita actions', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(createClient).mockResolvedValue(mockSupabase as any)
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as never)
   })
 
   it('bloquea la creación de cita si historial_clinico_veris es falso', async () => {

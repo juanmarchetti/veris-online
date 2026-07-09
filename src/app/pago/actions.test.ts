@@ -28,7 +28,7 @@ describe('pago actions - simularPagoAprobado', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(createClient).mockResolvedValue(mockSupabase as any)
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as never)
   })
 
   it('no rompe el pago si zoom falla (try/catch)', async () => {

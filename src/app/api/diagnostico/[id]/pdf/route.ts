@@ -5,7 +5,7 @@ import { verificarUsuario } from '@/utils/auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
 
@@ -144,15 +144,16 @@ export async function GET(
     drawText('Documento generado automáticamente por Veris Online. Válido sin firma.', 9, false, rgb(0.4, 0.4, 0.4))
 
     const pdfBytes = await pdfDoc.save()
+    const pdfBody = pdfBytes.buffer.slice(pdfBytes.byteOffset, pdfBytes.byteOffset + pdfBytes.byteLength) as ArrayBuffer
 
-    return new NextResponse(pdfBytes, {
+    return new NextResponse(pdfBody, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="Diagnostico_${diagnostico.pacientes?.nombre_completo.replace(/\s+/g, '_')}_${new Date(diagnostico.fecha).toISOString().split('T')[0]}.pdf"`,
       },
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error generando PDF:', err)
     return new NextResponse('Error interno al generar PDF', { status: 500 })
   }

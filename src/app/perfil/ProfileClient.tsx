@@ -12,7 +12,7 @@ type Props = {
     nombre: string
     avatar_url: string
   }
-  configuracionAdmin: Record<string, any> | null
+  configuracionAdmin: { titular_cuenta?: string; numero_cuenta?: string; banco?: string; tipo_cuenta?: string } | null
 }
 
 export default function ProfileClient({ user, configuracionAdmin }: Props) {
@@ -50,7 +50,7 @@ export default function ProfileClient({ user, configuracionAdmin }: Props) {
         // Refrescar para que el Header también se entere
         window.location.reload()
       }
-    } catch (error) {
+    } catch {
       setMensaje({ tipo: 'error', texto: 'Ocurrió un error inesperado al subir la imagen.' })
     } finally {
       setUploading(false)

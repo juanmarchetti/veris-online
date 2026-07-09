@@ -17,7 +17,7 @@ describe('Integración RLS: Médicos leen pacientes', () => {
     // En un entorno de CI se insertaría un paciente, un médico y una cita real,
     // y luego se probaría el join desde el usuario del médico.
     // Como esta es una prueba de validación de sintaxis:
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('citas')
       .select(`
         id,

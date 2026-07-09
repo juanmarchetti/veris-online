@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { simularPagoAprobado, simularPagoRechazado } from './actions'
+import { simularPagoAprobado } from './actions'
 import { CheckCircle2, Clock, CreditCard, ShieldCheck, Loader2 } from 'lucide-react'
 
 type Props = {

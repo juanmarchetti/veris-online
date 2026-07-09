@@ -22,7 +22,7 @@ describe('panel-medico actions', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(createClient).mockResolvedValue(mockSupabase as any)
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as never)
   })
 
   it('rechaza marcar cita en curso si el usuario no es médico', async () => {
@@ -32,7 +32,7 @@ describe('panel-medico actions', () => {
   })
 
   it('rechaza si la cita no existe o no pertenece al médico', async () => {
-    vi.mocked(verificarUsuario).mockResolvedValue({ error: undefined, user: { id: 'u1' } as any, role: 'medico' as any })
+    vi.mocked(verificarUsuario).mockResolvedValue({ error: undefined, user: { id: 'u1' } as never, role: 'medico' as never })
     
     // mock medicos select
     const medicosSelect = {

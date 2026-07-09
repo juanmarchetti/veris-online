@@ -47,10 +47,6 @@ const MEDICO_BASE = {
   hora_salida:  '17:00:00',
 }
 
-// Fecha futura para que no caiga en el pasado
-const manana = format(addDays(new Date(), 1), 'yyyy-MM-dd')
-const pasado_manana = format(addDays(new Date(), 2), 'yyyy-MM-dd')
-
 // Helper: devuelve un día de semana seguro (Lun-Vie) que esté en el futuro
 function proximoLunesViernes(): string {
   let d = addDays(new Date(), 1)

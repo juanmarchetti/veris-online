@@ -7,7 +7,6 @@ export const dynamic = 'force-dynamic'
 
 import { verificarUsuario } from '@/utils/auth'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import GestionPersonal, { type StaffMember } from './GestionPersonal'
 import GestionCatalogos from './GestionCatalogos'
@@ -26,9 +25,7 @@ export default async function AdminPage() {
       </main>
     )
   }
-
-  const supabase = await createClient()
-  const adminClient = createAdminClient()
+const adminClient = createAdminClient()
 
   // Estadísticas generales — usamos adminClient para saltar RLS y contar todo
   const [

@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 import FormAgendarCita from './FormAgendarCita'
 
 export default async function AgendarCitaPage() {
-  const { error, status, user } = await verificarUsuario(['paciente'])
+  const { error, status } = await verificarUsuario(['paciente'])
 
   if (error) {
     if (status === 401) redirect('/login')

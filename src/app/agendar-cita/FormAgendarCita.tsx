@@ -15,7 +15,7 @@
 import { useState, useMemo, useTransition } from 'react'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
-import { format, parseISO, addDays, startOfDay } from 'date-fns'
+import { format, parseISO, startOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useRouter } from 'next/navigation'
 import {

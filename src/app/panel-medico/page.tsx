@@ -133,7 +133,17 @@ export default async function PanelMedicoPage() {
     .eq('id_medico', medico.id)
     .order('fecha', { ascending: false })
 
-  const historial = (historialData || []).map((h: any) => ({
+  const historial = ((historialData || []) as Array<{
+    id: string
+    fecha: string
+    motivo_consulta: string
+    sintomas_reportados: string
+    diagnostico: string
+    tratamiento_indicado: string
+    observaciones: string
+    requiere_valoracion_presencial: boolean
+    pacientes?: { nombre_completo?: string } | null
+  }>).map((h) => ({
     ...h,
     paciente_nombre: h.pacientes?.nombre_completo || 'Paciente desconocido'
   }))

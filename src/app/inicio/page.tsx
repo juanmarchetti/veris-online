@@ -114,8 +114,8 @@ export default async function DashboardInicioPage() {
                     <p className="text-lg opacity-90">
                       a las {new Date(proximaCita.fecha_hora).toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' })}
                     </p>
-                    <p className="mt-2 font-medium">Dr(a). {proximaCita.medicos?.nombre_completo}</p>
-                    <p className="text-sm opacity-80">{proximaCita.especialidades?.nombre} — {proximaCita.motivo_consulta}</p>
+                    <p className="mt-2 font-medium">Dr(a). {proximaCita.medicos?.[0]?.nombre_completo}</p>
+                    <p className="text-sm opacity-80">{proximaCita.especialidades?.[0]?.nombre} - {proximaCita.motivo_consulta}</p>
                   </div>
                   
                   {(proximaCita.estado === 'confirmada' || proximaCita.estado === 'en_curso') ? (
@@ -225,7 +225,7 @@ export default async function DashboardInicioPage() {
                       <p className="text-xs text-foreground/60 mb-1">
                         {new Date(diag.fecha).toLocaleDateString('es-EC', { month: 'short', day: 'numeric' })}
                         {/* TypeScript safety for nested relations */}
-                        {diag.citas && (diag.citas as any).especialidades ? ` • ${(diag.citas as any).especialidades.nombre}` : ''}
+                        {diag.citas && (diag.citas as { especialidades?: { nombre?: string } }).especialidades ? ` • ${(diag.citas as { especialidades?: { nombre?: string } }).especialidades?.nombre}` : ''}
                       </p>
                       <p className="text-sm font-semibold line-clamp-2 text-foreground/90 leading-snug">
                         {diag.diagnostico}

@@ -17,12 +17,16 @@ export async function crearCita(formData: FormData) {
 
   const { data: paciente, error: pacError } = await supabase
     .from('pacientes')
-    .select('id')
+    .select('id, historial_clinico_veris')
     .eq('id_auth_user', user.id)
     .single()
 
   if (pacError || !paciente) {
     return { error: 'No se encontró tu perfil de paciente.' }
+  }
+
+  if (!paciente.historial_clinico_veris) {
+    return { error: 'Debes comunicarte al Contact Center (6009600) para registrar tu historial clínico antes de poder agendar.' }
   }
 
   const id_especialidad  = formData.get('id_especialidad') as string

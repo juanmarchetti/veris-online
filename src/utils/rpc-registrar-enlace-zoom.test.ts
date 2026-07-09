@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 // En un entorno de CI/CD real, este test se conectaría a una base de datos 
 // de prueba con Supabase configurado. Para este caso, simularemos el comportamiento

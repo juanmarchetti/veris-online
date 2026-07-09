@@ -17,8 +17,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { getAvailableSlot } from '@/utils/agendamiento-automatico'
-import { addMinutes, format } from 'date-fns'
-
 const MAX_REINTENTOS = 3  // máximos reintentos si hay condición de carrera
 
 export async function POST(req: NextRequest) {
@@ -34,12 +32,18 @@ export async function POST(req: NextRequest) {
     // ── 2. Obtener perfil del paciente ────────────────────────────────────
     const { data: paciente, error: pacError } = await supabase
       .from('pacientes')
-      .select('id, nombre_completo')
+      .select('id, nombre_completo, historial_clinico_veris')
       .eq('id_auth_user', user.id)
       .single()
 
     if (pacError || !paciente) {
       return NextResponse.json({ error: 'No se encontró tu perfil de paciente.' }, { status: 404 })
+    }
+
+    if (!paciente.historial_clinico_veris) {
+      return NextResponse.json({
+        error: 'Debes comunicarte al Contact Center (6009600) para registrar tu historial clínico antes de poder agendar.'
+      }, { status: 403 })
     }
 
     // ── 3. Parsear y validar el body ──────────────────────────────────────

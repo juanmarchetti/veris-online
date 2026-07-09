@@ -60,7 +60,7 @@ export async function actualizarRolYPerfil(formData: FormData) {
     let adminClient;
     try {
       adminClient = createAdminClient()
-    } catch (err: any) {
+    } catch {
       return { ok: false, error: 'Error de configuración: Faltan variables de entorno del servidor (SUPABASE_SERVICE_ROLE_KEY).' }
     }
 
@@ -132,7 +132,7 @@ export async function crearUsuarioStaff(formData: FormData) {
   let adminClient;
   try {
     adminClient = createAdminClient()
-  } catch (err: any) {
+  } catch {
     return { ok: false, error: 'Error de configuración: Faltan variables de entorno del servidor (SUPABASE_SERVICE_ROLE_KEY).' }
   }
 
@@ -185,7 +185,7 @@ export async function toggleSuspensionUsuario(userId: string, currentActivo: boo
   let adminClient;
   try {
     adminClient = createAdminClient()
-  } catch (err: any) {
+  } catch {
     return { ok: false, error: 'Error de configuración: Faltan variables de entorno del servidor (SUPABASE_SERVICE_ROLE_KEY).' }
   }
   

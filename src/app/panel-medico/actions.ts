@@ -33,9 +33,6 @@ export async function marcarCitaEnCurso(idCita: string) {
   revalidatePath('/panel-medico')
   return { success: true }
 }
-
-import { enviarCorreoConfirmacion } from '@/utils/resend' // Simularemos o usaremos resend, pero necesitamos crear enviarCorreoDiagnostico. Mejor lo definimos aquí o lo llamamos.
-
 export async function finalizarCitaMedico(
   idCita: string, 
   datosDiagnostico: {
@@ -120,8 +117,8 @@ export async function finalizarCitaMedico(
           <p>Gracias por usar Veris Online.</p>
         `
       })
-    } catch (e) {
-      console.error('Error enviando correo de diagnóstico:', e)
+    } catch (err) {
+      console.error('Error enviando correo de diagnóstico:', err)
     }
   }
 
@@ -213,7 +210,7 @@ export async function actualizarHorarioMedico(formData: FormData) {
   let dias_laborables: number[]
   try {
     dias_laborables = JSON.parse(diasRaw)
-  } catch (e) {
+  } catch {
     return { error: 'Formato de días inválido.' }
   }
 

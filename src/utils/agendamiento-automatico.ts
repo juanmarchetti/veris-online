@@ -54,8 +54,6 @@ type SupabaseAdminClient = ReturnType<typeof import('@/utils/supabase/admin').cr
 
 const BLOQUE_MINUTOS = 30        // granularidad de los slots
 const DIAS_FALLBACK   = 14       // días a buscar automáticamente si no hay cupo
-const TZ_OFFSET_MS    = 5 * 60 * 60 * 1000  // UTC-5 (Ecuador)
-
 // ─── Helpers internos ─────────────────────────────────────────────────────────
 
 /**
