@@ -29,7 +29,7 @@ export default async function PagoPage({
     if (status === 401) redirect('/login')
     return (
       <main className="flex min-h-[60vh] flex-col items-center justify-center p-6">
-        <h1 className="text-3xl font-bold text-red-600">Acceso Denegado</h1>
+        <h1 className="text-3xl font-bold text-red-600">Acceso denegado</h1>
         <p className="mt-4 text-center">Solo los pacientes pueden realizar pagos.</p>
       </main>
     )
@@ -83,8 +83,12 @@ export default async function PagoPage({
   const paymentsMode = getPaymentsMode()
 
   return (
-    <main className="flex flex-col items-center p-6">
-      <h1 className="text-3xl font-bold text-primary mb-8 text-center">Pago de Videoconsulta</h1>
+    <main className="page-shell max-w-6xl">
+      <div className="mb-8 grid gap-2 text-center">
+        <span className="section-kicker mx-auto">Confirmación</span>
+        <h1 className="text-3xl font-extrabold text-primary sm:text-4xl">Pago de videoconsulta</h1>
+        <p className="text-sm text-on-surface-variant">Ambiente sandbox para validar el flujo sin cobros reales.</p>
+      </div>
       <PagoSimulador
         idCita={idCita}
         monto={pago.monto}

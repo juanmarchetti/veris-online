@@ -1,7 +1,17 @@
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { AlertTriangle, CalendarCheck, ClipboardList, CreditCard, Headphones, LogIn, UserPlus, Video } from 'lucide-react'
+import {
+  AlertTriangle,
+  CalendarCheck,
+  ClipboardList,
+  CreditCard,
+  LogIn,
+  ShieldCheck,
+  UserPlus,
+  Video,
+} from 'lucide-react'
+import BrandLogo from '@/components/BrandLogo'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -25,107 +35,93 @@ export default async function Home() {
   const pasos = [
     {
       icon: ClipboardList,
-      title: 'Identificate',
-      text: 'Ingresa con tu cuenta o crea una nueva si aun no usas Veris Online.',
+      title: 'Registro seguro',
+      text: 'Crea tu cuenta o ingresa con tus credenciales para acceder al portal.',
     },
     {
       icon: CalendarCheck,
-      title: 'Agenda',
-      text: 'Selecciona especialidad, medico y dias disponibles para recibir un horario asignado.',
+      title: 'Agenda automática',
+      text: 'Selecciona especialidad, médico y días disponibles; el sistema asigna el mejor horario libre.',
     },
     {
       icon: CreditCard,
-      title: 'Confirma el pago',
-      text: 'Completa el pago dentro de la ventana de 30 minutos para confirmar la cita.',
+      title: 'Confirmación',
+      text: 'Completa el flujo de pago de prueba para confirmar la cita en la base de datos.',
     },
     {
       icon: Video,
-      title: 'Conectate',
-      text: 'El acceso a Zoom se habilita 3 minutos antes de la hora programada.',
+      title: 'Videoconsulta',
+      text: 'Accede a Zoom desde tus citas cuando la consulta esté habilitada.',
     },
   ]
 
   return (
     <main className="bg-background text-foreground">
-      <section className="mx-auto grid min-h-[calc(100vh-170px)] w-full max-w-6xl gap-8 px-6 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col gap-5">
-            <span className="inline-flex w-fit items-center gap-2 rounded-md border border-secondary/30 bg-secondary/10 px-3 py-1.5 text-sm font-semibold text-secondary">
-              <Video className="h-4 w-4" />
-              Videoconsulta web Veris
+      <section className="border-b border-outline-variant bg-surface-container-lowest">
+        <div className="page-shell grid min-h-[calc(100vh-190px)] content-center gap-8 py-10 sm:py-14">
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
+            <BrandLogo href="/" />
+            <span className="section-kicker">
+              <ShieldCheck className="h-4 w-4" />
+              Portal médico conectado a Supabase
             </span>
-
-            <div className="flex flex-col gap-4">
-              <h1 className="max-w-3xl text-4xl font-extrabold leading-tight text-primary sm:text-5xl">
-                Agenda, paga y accede a tu atencion medica online
+            <div className="grid gap-4">
+              <h1 className="text-4xl font-extrabold leading-tight text-primary sm:text-5xl">
+                Veris Online
               </h1>
-              <p className="max-w-2xl text-lg leading-relaxed text-on-surface-variant">
-                Portal web para gestionar videoconsultas de forma guiada: registro, validacion, pago,
-                conexion por Zoom e historial clinico digital.
+              <p className="text-lg leading-relaxed text-on-surface-variant sm:text-xl">
+                Plataforma web para agendar videoconsultas, confirmar atención online y consultar historial clínico digital.
               </p>
             </div>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Link href="/login" className="btn-primary py-3 text-base">
-              <LogIn className="h-5 w-5" />
-              Ingresar al portal
-            </Link>
-            <Link href="/registro" className="btn-outline w-full py-3 text-base">
-              <UserPlus className="h-5 w-5" />
-              Crear cuenta
-            </Link>
+            <div className="grid w-full max-w-xl gap-3 sm:grid-cols-2">
+              <Link href="/login" className="btn-primary py-3 text-base">
+                <LogIn className="h-5 w-5" />
+                Ingresar al portal
+              </Link>
+              <Link href="/registro" className="btn-outline w-full py-3 text-base">
+                <UserPlus className="h-5 w-5" />
+                Crear cuenta
+              </Link>
+            </div>
           </div>
 
           <div className="grid gap-3 rounded-lg border border-error/30 bg-error-container/60 p-4 text-on-error-container">
             <div className="flex items-start gap-3">
               <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-wide">No usar en emergencias</h2>
+                <h2 className="text-sm font-bold uppercase">No usar en emergencias</h2>
                 <p className="mt-1 text-sm leading-relaxed">
-                  Si presentas dolor de pecho, dificultad para respirar, perdida de conocimiento u otros sintomas graves,
+                  Si presentas dolor de pecho, dificultad para respirar, pérdida de conocimiento u otros síntomas graves,
                   acude de inmediato a un centro de salud o llama a emergencias.
                 </p>
               </div>
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="rounded-lg border border-outline-variant bg-surface-container-lowest">
-          <div className="border-b border-outline-variant p-5">
-            <h2 className="text-xl font-bold text-primary">Flujo de atencion</h2>
-            <p className="mt-1 text-sm text-on-surface-variant">Pasos esperados para completar una videoconsulta.</p>
-          </div>
+      <section className="page-shell py-8">
+        <div className="mb-5 flex flex-col gap-1">
+          <h2 className="text-2xl font-bold text-primary">Flujo de atención</h2>
+          <p className="text-sm text-on-surface-variant">Cada paso queda conectado al sistema y a la base de datos.</p>
+        </div>
 
-          <div className="divide-y divide-outline-variant">
-            {pasos.map((paso, index) => {
-              const Icon = paso.icon
-              return (
-                <div key={paso.title} className="flex gap-4 p-5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {pasos.map((paso, index) => {
+            const Icon = paso.icon
+            return (
+              <article key={paso.title} className="card p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="grid h-11 w-11 place-items-center rounded-lg bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wide text-on-surface-variant">
-                      Paso {index + 1}
-                    </p>
-                    <h3 className="mt-1 font-bold text-on-surface">{paso.title}</h3>
-                    <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">{paso.text}</p>
-                  </div>
+                  <span className="text-xs font-extrabold uppercase text-on-surface-variant">Paso {index + 1}</span>
                 </div>
-              )
-            })}
-          </div>
-
-          <div className="border-t border-outline-variant bg-surface-container-low p-5">
-            <div className="flex items-start gap-3 text-sm text-on-surface-variant">
-              <Headphones className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
-              <p>
-                Soporte Contact Center: <strong className="text-on-surface">6009600</strong>. El registro web habilita
-                el agendamiento automaticamente; soporte queda disponible para ayuda operativa.
-              </p>
-            </div>
-          </div>
+                <h3 className="font-bold text-on-surface">{paso.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{paso.text}</p>
+              </article>
+            )
+          })}
         </div>
       </section>
     </main>

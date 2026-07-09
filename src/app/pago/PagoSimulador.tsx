@@ -112,12 +112,12 @@ export default function PagoSimulador({
     const errors: { [key: string]: string } = {}
     const digits = cardNumber.replace(/\D/g, '')
 
-    if (!isSandbox) errors.cardNumber = 'La pasarela real aun no esta configurada.'
-    if (digits.length < 15) errors.cardNumber = 'Numero de tarjeta invalido'
+    if (!isSandbox) errors.cardNumber = 'La pasarela real aún no está configurada.'
+    if (digits.length < 15) errors.cardNumber = 'Número de tarjeta inválido'
     if (isSandbox && digits !== TEST_CARD_DIGITS) errors.cardNumber = 'En sandbox usa la tarjeta 4242 4242 4242 4242'
-    if (cardName.trim().length < 3) errors.cardName = 'Nombre invalido'
-    if (expiry.length < 5) errors.expiry = 'Fecha invalida'
-    if (cvv.length < 3) errors.cvv = 'CVV invalido'
+    if (cardName.trim().length < 3) errors.cardName = 'Nombre inválido'
+    if (expiry.length < 5) errors.expiry = 'Fecha inválida'
+    if (cvv.length < 3) errors.cvv = 'CVV inválido'
 
     setFormErrors(errors)
     return Object.keys(errors).length === 0
@@ -151,7 +151,7 @@ export default function PagoSimulador({
         setTimeout(() => router.push('/mis-citas'), 2200)
       } catch (err) {
         console.error(err)
-        setError('Ocurrio un error inesperado al procesar el pago de prueba.')
+        setError('Ocurrió un error inesperado al procesar el pago de prueba.')
       }
     })
   }
@@ -175,7 +175,7 @@ export default function PagoSimulador({
               <span className="font-semibold text-right">{especialidad}</span>
             </div>
             <div className="flex justify-between items-center border-b border-foreground/10 pb-3 gap-4">
-              <span className="text-foreground/60">Medico</span>
+              <span className="text-foreground/60">Médico</span>
               <span className="font-semibold text-right">{medico}</span>
             </div>
             <div className="flex justify-between items-center border-b border-foreground/10 pb-3 gap-4">
@@ -222,9 +222,9 @@ export default function PagoSimulador({
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-8 rounded bg-[#d7c47a]" />
-                <span className="text-xs font-bold tracking-[0.2em] text-white/60">TEST CARD</span>
+                <span className="text-xs font-bold text-white/60">TEST CARD</span>
               </div>
-              <span className="text-xs font-bold tracking-[0.2em] text-emerald-300">SANDBOX</span>
+              <span className="text-xs font-bold text-emerald-300">SANDBOX</span>
             </div>
 
             <div className="font-mono text-xl md:text-2xl tracking-widest mb-4 text-white/90 break-words">
@@ -239,14 +239,14 @@ export default function PagoSimulador({
           {estadoPago === 'aprobado' && (
             <div className="bg-green-50 text-green-700 p-6 rounded-lg text-center font-bold border border-green-200">
               <div className="flex justify-center mb-3 text-green-600"><CheckCircle2 className="w-12 h-12" /></div>
-              Pago aprobado. Tu cita esta confirmada.
+              Pago aprobado. Tu cita está confirmada.
             </div>
           )}
 
           {estadoPago === 'expirado' && (
             <div className="bg-red-50 text-red-600 p-6 rounded-lg text-center font-bold border border-red-200">
               <div className="flex justify-center mb-3 text-red-600"><Clock className="w-12 h-12" /></div>
-              El plazo expiro. Cita cancelada.
+              El plazo expiró. Cita cancelada.
             </div>
           )}
 
@@ -272,7 +272,7 @@ export default function PagoSimulador({
                   </button>
 
                   <div>
-                    <label className="input-label">Numero de tarjeta</label>
+                    <label className="input-label">Número de tarjeta</label>
                     <div className="relative">
                       <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                       <input
@@ -355,7 +355,7 @@ export default function PagoSimulador({
           {expirado && estadoPago === 'pendiente' && (
             <div className="bg-red-50 text-red-600 p-6 rounded-lg text-center font-bold border border-red-200 mt-6">
               <div className="flex justify-center mb-3 text-red-600"><Clock className="w-12 h-12" /></div>
-              El plazo expiro. Cita cancelada automaticamente.
+              El plazo expiró. Cita cancelada automáticamente.
             </div>
           )}
         </div>

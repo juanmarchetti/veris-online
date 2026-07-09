@@ -1,18 +1,15 @@
 'use client';
 
-// SRS RF-01.3 [FUENTE]: Registro de paciente nuevo en el portal.
-// Recolecta: tipo/número de identificación, nombre, correo, teléfono, contraseña.
-// Diseño Stitch: "Crea tu cuenta" — Clinical Minimalist.
-
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 
 export default function RegistroPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,17 +38,16 @@ export default function RegistroPage() {
     }
 
     try {
-      // 1. Pre-validación: Revisar si el número de identificación o correo ya existen
       const { data: existingUser } = await supabase
         .from('pacientes')
         .select('correo, numero_identificacion')
         .or(`correo.eq.${correo},numero_identificacion.eq.${numero_identificacion}`)
         .limit(1)
         .maybeSingle();
-        
+
       if (existingUser) {
         if (existingUser.numero_identificacion === numero_identificacion) {
-          throw new Error('Este número de identificación ya se encuentra registrado. Si es tuyo, contacta a soporte.');
+          throw new Error('Este número de identificación ya se encuentra registrado.');
         }
         if (existingUser.correo === correo) {
           throw new Error('Este correo ya está registrado. Por favor, inicia sesión.');
@@ -69,7 +65,7 @@ export default function RegistroPage() {
       if (authError) {
         const msg = authError.message || '';
         if (msg.includes('already registered')) throw new Error('El correo ya está registrado.');
-        if (msg.includes('Password should be at least')) throw new Error('La contraseña es demasiado débil (mínimo 6 caracteres).');
+        if (msg.includes('Password should be at least')) throw new Error('La contraseña es demasiado débil. Usa mínimo 6 caracteres.');
         if (msg === '{}' || msg.trim() === '') throw new Error('Error inesperado al registrarte. Intenta de nuevo.');
         throw new Error(msg);
       }
@@ -77,7 +73,7 @@ export default function RegistroPage() {
       if (!authData.user) throw new Error('No se pudo crear el usuario.');
 
       if (!authData.session) {
-        setSuccessMsg('¡Cuenta creada! Revisa tu correo electrónico para confirmar tu cuenta antes de iniciar sesión.');
+        setSuccessMsg('Cuenta creada. Revisa tu correo electrónico para confirmar tu cuenta antes de iniciar sesión.');
         return;
       }
 
@@ -93,7 +89,7 @@ export default function RegistroPage() {
       });
 
       if (dbError) {
-        setError(`Tu cuenta fue creada, pero hubo un problema al guardar tus datos (${dbError.message}). Contacta a soporte.`);
+        setError(`Tu cuenta fue creada, pero hubo un problema al guardar tus datos (${dbError.message}).`);
         return;
       }
 
@@ -107,53 +103,31 @@ export default function RegistroPage() {
   };
 
   return (
-    <main
-      style={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem 1rem',
-        minHeight: '70vh',
-        background: 'var(--background)',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '480px',
-          background: 'var(--surface-container-lowest)',
-          borderRadius: '0.75rem',
-          borderTop: '4px solid var(--primary-container)',
-          boxShadow: '0 4px 24px rgba(30, 41, 59, 0.08)',
-          padding: '2.5rem',
-        }}
-      >
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '26px', fontWeight: 700, color: 'var(--primary-container)', margin: '0 0 0.5rem' }}>
-            Crea tu cuenta
-          </h1>
-          <p style={{ fontSize: '14px', color: 'var(--on-surface-variant)' }}>
-            Completa tus datos para empezar a cuidar tu salud
-          </p>
+    <main className="grid min-h-[72vh] place-items-center bg-background px-4 py-8">
+      <div className="card w-full max-w-lg border-t-4 border-t-primary p-6 sm:p-8">
+        <div className="mb-8 grid justify-items-center gap-4 text-center">
+          <BrandLogo href="/" />
+          <div>
+            <h1 className="text-2xl font-extrabold text-primary">Crea tu cuenta</h1>
+            <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">
+              Completa tus datos para activar tu acceso al portal.
+            </p>
+          </div>
         </div>
 
-        {/* Messages */}
-        {error && <div className="alert-error" style={{ marginBottom: '1.25rem' }}>{error}</div>}
+        {error && <div className="alert-error mb-5">{error}</div>}
         {successMsg && (
-          <div className="alert-success" style={{ marginBottom: '1.25rem' }}>
+          <div className="alert-success mb-5">
             {successMsg}
-            <div style={{ marginTop: '0.75rem' }}>
-              <Link href="/login" style={{ fontWeight: 600, color: 'var(--primary-container)' }}>Ir al inicio de sesión →</Link>
+            <div className="mt-3">
+              <Link href="/login" className="font-bold text-primary hover:underline">Ir al inicio de sesión</Link>
             </div>
           </div>
         )}
 
         {!successMsg && (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* Identificación */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.75rem' }}>
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="grid gap-3 sm:grid-cols-[1fr_2fr]">
               <div>
                 <label htmlFor="tipo_identificacion" className="input-label">Tipo de ID</label>
                 <select id="tipo_identificacion" name="tipo_identificacion" required className="input-field">
@@ -168,92 +142,88 @@ export default function RegistroPage() {
               </div>
             </div>
 
-            {/* Nombre */}
             <div>
-              <label htmlFor="nombre_completo" className="input-label">Nombres y Apellidos</label>
+              <label htmlFor="nombre_completo" className="input-label">Nombres y apellidos</label>
               <input id="nombre_completo" type="text" name="nombre_completo" required placeholder="Ej. Juan Pérez" className="input-field" />
             </div>
 
-            {/* Correo */}
             <div>
               <label htmlFor="correo" className="input-label">Correo electrónico</label>
               <input id="correo" type="email" name="correo" required placeholder="tu@email.com" className="input-field" />
             </div>
 
-            {/* Teléfono */}
             <div>
               <label htmlFor="telefono" className="input-label">Número de celular</label>
               <input id="telefono" type="tel" name="telefono" placeholder="0912345678" className="input-field" />
             </div>
 
-            {/* Contraseña */}
-            <div>
-              <label htmlFor="password" className="input-label">Contraseña</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  required
-                  minLength={6}
-                  placeholder="••••••••"
-                  className="input-field"
-                  style={{ paddingRight: '3rem' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(v => !v)}
-                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--outline)', padding: '0.25rem' }}
-                  aria-label="Mostrar/ocultar contraseña"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
+            <PasswordField
+              id="password"
+              name="password"
+              label="Contraseña"
+              show={showPassword}
+              onToggle={() => setShowPassword(value => !value)}
+            />
 
-            {/* Confirmar contraseña */}
-            <div>
-              <label htmlFor="confirmPassword" className="input-label">Confirmar contraseña</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="confirmPassword"
-                  type={showConfirm ? 'text' : 'password'}
-                  name="confirmPassword"
-                  required
-                  minLength={6}
-                  placeholder="••••••••"
-                  className="input-field"
-                  style={{ paddingRight: '3rem' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(v => !v)}
-                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--outline)', padding: '0.25rem' }}
-                  aria-label="Mostrar/ocultar confirmar contraseña"
-                >
-                  {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
+            <PasswordField
+              id="confirmPassword"
+              name="confirmPassword"
+              label="Confirmar contraseña"
+              show={showConfirm}
+              onToggle={() => setShowConfirm(value => !value)}
+            />
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary"
-              style={{ marginTop: '0.5rem' }}
-            >
-              {loading ? 'Registrando…' : 'Registrarme'}
+            <button type="submit" disabled={loading} className="btn-primary mt-2">
+              {loading ? 'Registrando...' : 'Registrarme'}
             </button>
           </form>
         )}
 
-        {/* Login link */}
-        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-          <Link href="/login" style={{ fontSize: '14px', color: 'var(--secondary)', fontWeight: 500, textDecoration: 'none' }}>
+        <div className="mt-6 text-center">
+          <Link href="/login" className="text-sm font-bold text-secondary hover:underline">
             ¿Ya tienes cuenta? Inicia sesión aquí
           </Link>
         </div>
       </div>
     </main>
   );
+}
+
+function PasswordField({
+  id,
+  name,
+  label,
+  show,
+  onToggle,
+}: {
+  id: string
+  name: string
+  label: string
+  show: boolean
+  onToggle: () => void
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="input-label">{label}</label>
+      <div className="relative">
+        <input
+          id={id}
+          type={show ? 'text' : 'password'}
+          name={name}
+          required
+          minLength={6}
+          placeholder="Mínimo 6 caracteres"
+          className="input-field pr-12"
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md text-outline transition-colors hover:bg-surface-container hover:text-primary"
+          aria-label={show ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+        >
+          {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+        </button>
+      </div>
+    </div>
+  )
 }

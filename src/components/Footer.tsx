@@ -1,55 +1,29 @@
-// Footer global de Veris Online — Diseño Stitch
-// Contiene: Marca, Copyright, Contact Center (SRS), Términos y Privacidad
+import BrandLogo from './BrandLogo'
 
 export default function Footer() {
   return (
-    <footer
-      style={{
-        background: 'var(--surface-container-highest)',
-        borderTop: '1px solid var(--outline-variant)',
-        padding: '1.5rem 2rem',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '1rem',
-        }}
-      >
-        {/* Brand */}
-        <span style={{ fontWeight: 700, fontSize: '18px', color: 'var(--primary)' }}>
-          Veris Online
-        </span>
+    <footer className="border-t border-outline-variant bg-surface-container-highest">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-2">
+          <BrandLogo href="/" />
+          <p className="max-w-md text-sm leading-relaxed text-on-surface-variant">
+            Plataforma web de videoconsulta médica, agenda online e historial clínico digital.
+          </p>
+        </div>
 
-        {/* Copyright */}
-        <span style={{ fontSize: '13px', color: 'var(--on-surface-variant)' }}>
-          © 2024 Veris Online. Todos los derechos reservados.
-        </span>
-
-        {/* Links + Contact */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--on-surface-variant)' }}>
-            Contact Center: <strong>6009600</strong>
-          </span>
-          <a
-            href="#"
-            style={{ fontSize: '13px', color: 'var(--on-surface-variant)', textDecoration: 'underline' }}
-          >
-            Términos y Condiciones
-          </a>
-          <a
-            href="#"
-            style={{ fontSize: '13px', color: 'var(--on-surface-variant)', textDecoration: 'underline' }}
-          >
-            Privacidad
-          </a>
+        <div className="flex flex-col gap-2 text-sm text-on-surface-variant md:items-end">
+          <span className="font-semibold">Soporte: 6009600</span>
+          <span>© 2026 Veris Online. Todos los derechos reservados.</span>
+          <div className="flex flex-wrap gap-3">
+            <a href="#" className="font-semibold text-on-surface-variant underline underline-offset-4 hover:text-primary">
+              Términos
+            </a>
+            <a href="#" className="font-semibold text-on-surface-variant underline underline-offset-4 hover:text-primary">
+              Privacidad
+            </a>
+          </div>
         </div>
       </div>
     </footer>
-  );
+  )
 }

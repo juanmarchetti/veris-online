@@ -180,14 +180,14 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto">
 
       {/* ── Indicador de pasos ─────────────────────────────────────────── */}
-      <div className="flex items-center justify-center gap-0 mb-8">
+      <div className="mb-8 flex items-center justify-center overflow-hidden">
         {[1, 2, 3].map((n) => (
           <div key={n} className="flex items-center">
             <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+              className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
                 paso === n
                   ? 'bg-[#0c54a0] text-white shadow-md'
                   : paso > n
@@ -198,7 +198,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
               {paso > n ? <CheckCircle size={16} /> : n}
             </div>
             {n < 3 && (
-              <div className={`h-0.5 w-16 transition-all ${paso > n ? 'bg-[#006a63]' : 'bg-gray-200'}`} />
+              <div className={`h-0.5 w-10 transition-all sm:w-16 ${paso > n ? 'bg-[#006a63]' : 'bg-gray-200'}`} />
             )}
           </div>
         ))}
@@ -206,7 +206,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
 
       {/* ── Error global ───────────────────────────────────────────────── */}
       {error && (
-        <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 text-sm">
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           <AlertTriangle size={16} className="mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -216,7 +216,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
           PASO 1: Seleccionar especialidad y médico
       ═══════════════════════════════════════════════════════════════════ */}
       {paso === 1 && (
-        <div className="card p-8 flex flex-col gap-6">
+        <div className="card flex flex-col gap-6 p-5 sm:p-8">
           <div>
             <h2 className="text-xl font-bold text-[#003d79] flex items-center gap-2 mb-1">
               <Stethoscope size={22} />
@@ -305,7 +305,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
           PASO 2: Seleccionar días disponibles
       ═══════════════════════════════════════════════════════════════════ */}
       {paso === 2 && (
-        <div className="card p-8 flex flex-col gap-6">
+        <div className="card flex flex-col gap-6 p-5 sm:p-8">
           <div>
             <h2 className="text-xl font-bold text-[#003d79] flex items-center gap-2 mb-1">
               <Calendar size={22} />
@@ -318,7 +318,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
           </div>
 
           {/* Calendario multi-selección */}
-          <div className="border rounded-xl bg-white p-4 flex justify-center">
+          <div className="overflow-x-auto rounded-lg border bg-white p-3 sm:p-4">
             <DayPicker
               mode="multiple"
               selected={diasSeleccionados}
@@ -335,7 +335,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
 
           {/* Días seleccionados */}
           {diasSeleccionados.length > 0 && (
-            <div className="bg-blue-50 rounded-xl p-4">
+            <div className="rounded-lg bg-blue-50 p-4">
               <p className="text-xs font-semibold text-[#003d79] mb-2 uppercase tracking-wide">
                 Días seleccionados ({diasSeleccionados.length}/{MAX_DIAS})
               </p>
@@ -343,7 +343,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
                 {[...diasSeleccionados].sort((a, b) => a.getTime() - b.getTime()).map(d => (
                   <span
                     key={d.toISOString()}
-                    className="text-xs bg-white border border-blue-200 text-blue-800 px-3 py-1 rounded-full"
+                  className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs text-blue-800"
                   >
                     {format(d, "EEE d 'de' MMM", { locale: es })}
                   </span>
@@ -365,7 +365,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
           </div>
 
           {/* Info FIFO */}
-          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-sm">
+          <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
             <Info size={16} className="mt-0.5 shrink-0" />
             <span>
               El sistema asignará automáticamente el <strong>primer horario libre disponible</strong> entre los días
@@ -373,16 +373,16 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
             </span>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <button
-              className="btn-outline flex-1"
+              className="btn-outline w-full sm:flex-1"
               onClick={() => { setError(''); setPaso(1) }}
             >
               <ArrowLeft size={16} />
               Volver
             </button>
             <button
-              className="btn-primary flex-2"
+              className="btn-primary w-full sm:flex-[2]"
               onClick={buscarSlot}
               disabled={buscando}
               style={{ flex: 2 }}
@@ -401,7 +401,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
           PASO 3: Slot asignado automáticamente
       ═══════════════════════════════════════════════════════════════════ */}
       {paso === 3 && slotAsignado && (
-        <div className="card p-8 flex flex-col gap-6">
+        <div className="card flex flex-col gap-6 p-5 sm:p-8">
           <div className="text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle size={36} className="text-green-600" />
@@ -415,17 +415,17 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
           </div>
 
           {/* Tarjeta del slot asignado */}
-          <div className="bg-gradient-to-br from-[#003d79] to-[#0c54a0] text-white rounded-2xl p-6 flex flex-col gap-4">
+          <div className="flex flex-col gap-4 rounded-lg bg-primary p-5 text-white sm:p-6">
             {/* Doctor alternativo */}
             {slotAsignado.esDoctorAlternativo && (
-              <div className="bg-amber-400/20 border border-amber-300/30 rounded-xl px-4 py-2 text-sm flex items-center gap-2">
+              <div className="flex items-center gap-2 rounded-lg border border-amber-300/30 bg-amber-400/20 px-4 py-2 text-sm">
                 <AlertTriangle size={14} />
                 <span>El médico solicitado no tenía disponibilidad. Se te asignó otro doctor de la misma especialidad.</span>
               </div>
             )}
             {/* Slot alternativo (14 días) */}
             {slotAsignado.esAlternativa && !slotAsignado.esDoctorAlternativo && (
-              <div className="bg-blue-400/20 border border-blue-300/30 rounded-xl px-4 py-2 text-sm flex items-center gap-2">
+              <div className="flex items-center gap-2 rounded-lg border border-blue-300/30 bg-blue-400/20 px-4 py-2 text-sm">
                 <Info size={14} />
                 <span>Los días seleccionados no tenían disponibilidad. Se buscó automáticamente el próximo hueco.</span>
               </div>
@@ -457,7 +457,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
           </div>
 
           {/* Advertencia: no es modificable */}
-          <div className="flex items-start gap-3 bg-gray-50 border border-gray-200 text-gray-600 p-4 rounded-xl text-sm">
+          <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
             <Info size={16} className="mt-0.5 shrink-0" />
             <span>
               El horario fue asignado por el sistema y <strong>no puede modificarse manualmente</strong>.

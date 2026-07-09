@@ -114,7 +114,12 @@ export default function ProfileClient({ user, configuracionAdmin }: Props) {
               <div className="flex flex-col items-center gap-4">
                 <div className="relative w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 flex items-center justify-center group">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    <span
+                      role="img"
+                      aria-label="Avatar"
+                      className="h-full w-full bg-cover bg-center"
+                      style={{ backgroundImage: `url(${avatarUrl})` }}
+                    />
                   ) : (
                     <User size={48} className="text-gray-400" />
                   )}

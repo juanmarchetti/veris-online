@@ -16,7 +16,7 @@ function canFallbackToLegacyRpc(message: string) {
 
 export async function procesarPagoSandbox(idCita: string, input: PagoSandboxInput = {}) {
   if (getPaymentsMode() !== 'sandbox') {
-    return { error: 'Pago real aun no configurado. Activa PAYMENTS_MODE=sandbox para pruebas.' }
+    return { error: 'Pago real aún no configurado. Activa PAYMENTS_MODE=sandbox para pruebas.' }
   }
 
   const supabase = await createClient()

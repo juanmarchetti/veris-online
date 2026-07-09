@@ -1,9 +1,15 @@
 'use client';
+
 import { createClient } from '@/utils/supabase/client';
+import { LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export default function LogoutButton() {
+type LogoutButtonProps = {
+  className?: string
+}
+
+export default function LogoutButton({ className = '' }: LogoutButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
@@ -18,24 +24,13 @@ export default function LogoutButton() {
 
   return (
     <button
+      type="button"
       onClick={handleLogout}
       disabled={loading}
-      style={{
-        fontSize: '14px',
-        fontWeight: 500,
-        color: 'var(--error)',
-        background: 'transparent',
-        border: 'none',
-        padding: '0.4rem 0.75rem',
-        borderRadius: '0.375rem',
-        cursor: loading ? 'not-allowed' : 'pointer',
-        opacity: loading ? 0.6 : 1,
-        transition: 'background 0.15s',
-      }}
-      onMouseEnter={e => (e.currentTarget.style.background = '#fef2f2')}
-      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+      className={`inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-error transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
     >
-      {loading ? 'Saliendo…' : 'Cerrar Sesión'}
+      <LogOut className="h-4 w-4" />
+      {loading ? 'Saliendo...' : 'Cerrar sesión'}
     </button>
   );
 }

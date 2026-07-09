@@ -1,65 +1,70 @@
 import Link from 'next/link'
-import { Calendar, MonitorPlay, CreditCard, Mail, Phone } from 'lucide-react'
+import { Calendar, CreditCard, Mail, MonitorPlay, Phone } from 'lucide-react'
+
+const temas = [
+  {
+    icon: Calendar,
+    title: '¿Cómo agendar una cita?',
+    text: 'Ingresa al portal, abre Agendar cita, selecciona especialidad, médico y tus días disponibles. El sistema asignará automáticamente el mejor horario libre.',
+  },
+  {
+    icon: MonitorPlay,
+    title: '¿Cómo me conecto a la videoconsulta?',
+    text: 'Ve a Mis citas. Si la cita está confirmada y el acceso ya fue habilitado, aparecerá el botón para conectarte a Zoom.',
+  },
+  {
+    icon: CreditCard,
+    title: 'Pago de prueba',
+    text: 'El proyecto usa una pasarela sandbox. Sirve para confirmar el flujo académico sin cobrar dinero real.',
+  },
+]
 
 export default function AyudaPage() {
   return (
-    <main className="flex min-h-[70vh] flex-col items-center justify-center p-6 max-w-4xl mx-auto w-full">
-      <div className="bg-white dark:bg-black/20 p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-foreground/5 w-full">
-        <h1 className="text-3xl font-bold text-primary mb-6 text-center">Centro de Ayuda</h1>
-        
-        <div className="space-y-6">
-          <section className="bg-surface p-6 rounded-xl border border-foreground/10">
-            <h2 className="text-xl font-bold text-secondary mb-3 flex items-center gap-2">
-              <Calendar className="w-5 h-5" /> ¿Cómo agendar una cita?
-            </h2>
-            <p className="text-foreground/80 leading-relaxed text-sm">
-              Para agendar una cita, dirígete a la pestaña de <strong>Inicio</strong>, selecciona tu motivo de consulta, la especialidad y el médico de tu preferencia. 
-              Luego elige la fecha y hora disponible. Finalmente, serás redirigido a la pasarela de pago para confirmar tu turno.
-            </p>
-          </section>
+    <main className="page-shell grid gap-6">
+      <div className="mx-auto grid max-w-3xl gap-2 text-center">
+        <span className="section-kicker mx-auto">Soporte</span>
+        <h1 className="text-3xl font-extrabold text-primary sm:text-4xl">Centro de ayuda</h1>
+        <p className="text-sm leading-relaxed text-on-surface-variant">
+          Resuelve las dudas principales sobre agenda, videoconsulta y confirmación de pago.
+        </p>
+      </div>
 
-          <section className="bg-surface p-6 rounded-xl border border-foreground/10">
-            <h2 className="text-xl font-bold text-secondary mb-3 flex items-center gap-2">
-              <MonitorPlay className="w-5 h-5" /> ¿Cómo me conecto a la videoconsulta?
-            </h2>
-            <p className="text-foreground/80 leading-relaxed text-sm">
-              Ve a la sección <strong>Mis citas</strong>. Si tu cita está confirmada y faltan menos de 3 minutos para la hora agendada, 
-              aparecerá el botón <em>&quot;Conectarse a Zoom&quot;</em>. Al hacer clic, se abrirá la sala de espera virtual.
-            </p>
-          </section>
+      <div className="grid gap-4 md:grid-cols-3">
+        {temas.map((tema) => {
+          const Icon = tema.icon
+          return (
+            <section key={tema.title} className="card p-5">
+              <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg bg-secondary/10 text-secondary">
+                <Icon className="h-5 w-5" />
+              </div>
+              <h2 className="text-lg font-extrabold text-on-surface">{tema.title}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{tema.text}</p>
+            </section>
+          )
+        })}
+      </div>
 
-          <section className="bg-surface p-6 rounded-xl border border-foreground/10">
-            <h2 className="text-xl font-bold text-secondary mb-3 flex items-center gap-2">
-              <CreditCard className="w-5 h-5" /> Problemas con el pago
-            </h2>
-            <p className="text-foreground/80 leading-relaxed text-sm">
-              Si tu pago fue rechazado, puedes volver a intentarlo desde <strong>Mis citas</strong> siempre y cuando no hayan pasado 30 minutos desde 
-              que agendaste el turno. Si el tiempo expira, la cita se cancelará automáticamente y deberás agendar una nueva.
-            </p>
-          </section>
+      <section className="rounded-lg border border-primary/20 bg-primary/5 p-5 text-center">
+        <h2 className="text-lg font-extrabold text-primary">¿Necesitas soporte técnico?</h2>
+        <p className="mt-2 text-sm text-on-surface-variant">
+          Si tienes problemas para ingresar, agendar o conectarte, usa estos canales de soporte.
+        </p>
+        <div className="mt-4 flex flex-col items-center justify-center gap-3 text-sm font-semibold sm:flex-row">
+          <a href="mailto:soporte@veris.med.ec" className="inline-flex items-center gap-2 text-primary hover:underline">
+            <Mail className="h-4 w-4" /> soporte@veris.med.ec
+          </a>
+          <span className="hidden text-outline sm:block">|</span>
+          <span className="inline-flex items-center gap-2 text-on-surface">
+            <Phone className="h-4 w-4" /> 6009600
+          </span>
         </div>
+      </section>
 
-        <div className="mt-10 text-center bg-primary/5 p-6 rounded-xl border border-primary/20">
-          <h3 className="font-bold text-lg mb-2">¿Necesitas soporte técnico?</h3>
-          <p className="text-foreground/70 text-sm mb-4">
-            Si estás experimentando problemas técnicos urgentes, contáctanos:
-          </p>
-          <div className="flex justify-center gap-4 text-sm font-medium">
-            <a href="mailto:soporte@veris.med.ec" className="text-primary hover:underline flex items-center gap-1">
-              <Mail className="w-4 h-4" /> soporte@veris.med.ec
-            </a>
-            <span className="text-foreground/30">|</span>
-            <span className="text-foreground flex items-center gap-1">
-              <Phone className="w-4 h-4" /> 1800-VERIS-ONLINE
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-8 text-center">
-          <Link href="/mis-citas" className="btn-primary inline-block px-8 py-3 rounded-xl font-bold">
-            Volver a Mis Citas
-          </Link>
-        </div>
+      <div className="mx-auto grid w-full max-w-sm">
+        <Link href="/mis-citas" className="btn-primary">
+          Volver a mis citas
+        </Link>
       </div>
     </main>
   )

@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { expirarPagosPendientes } from '@/utils/expirarPagos'
 import Link from 'next/link'
+import { AlertTriangle, CalendarPlus, ClipboardList, FileText, Video } from 'lucide-react'
+import EmptyState from '@/components/EmptyState'
 
 type CitaRespuesta = {
   id: string
@@ -12,23 +14,21 @@ type CitaRespuesta = {
   especialidades: { nombre: string } | null
   medicos: { nombre_completo: string } | null
 }
-import { AlertTriangle } from 'lucide-react'
 
-// Colores para cada estado de cita
 function badgeEstado(estado: string) {
   switch (estado) {
     case 'confirmada':
       return 'bg-green-100 text-green-700'
     case 'pendiente_pago':
-      return 'bg-yellow-100 text-yellow-700'
+      return 'bg-yellow-100 text-yellow-800'
     case 'cancelada':
-      return 'bg-red-100 text-red-600'
+      return 'bg-red-100 text-red-700'
     case 'en_curso':
       return 'bg-blue-100 text-blue-700'
     case 'finalizada':
-      return 'bg-gray-100 text-gray-600'
+      return 'bg-gray-100 text-gray-700'
     case 'agendada':
-      return 'bg-purple-100 text-purple-700'
+      return 'bg-primary/10 text-primary'
     default:
       return 'bg-secondary/10 text-secondary'
   }
@@ -36,10 +36,10 @@ function badgeEstado(estado: string) {
 
 function etiquetaEstado(estado: string) {
   switch (estado) {
-    case 'pendiente_pago': return 'Pendiente de Pago'
+    case 'pendiente_pago': return 'Pendiente de pago'
     case 'confirmada': return 'Confirmada'
     case 'cancelada': return 'Cancelada'
-    case 'en_curso': return 'En Curso'
+    case 'en_curso': return 'En curso'
     case 'finalizada': return 'Finalizada'
     case 'agendada': return 'Agendada'
     default: return estado
@@ -47,22 +47,39 @@ function etiquetaEstado(estado: string) {
 }
 
 export default async function MisCitasPage() {
-  const { error, status } = await verificarUsuario(['paciente'])
+  const { error, status, user } = await verificarUsuario(['paciente'])
 
-  if (error) {
+  if (error || !user) {
     if (status === 401) redirect('/login')
     return (
       <main className="flex min-h-[60vh] flex-col items-center justify-center p-6">
-        <h1 className="text-3xl font-bold text-red-600">Acceso Denegado</h1>
+        <h1 className="text-3xl font-bold text-red-600">Acceso denegado</h1>
         <p className="mt-4 text-center">Solo los pacientes pueden ver sus citas.</p>
       </main>
     )
   }
 
-  // Expiración perezosa antes de consultar
   await expirarPagosPendientes()
 
   const supabase = await createClient()
+
+  const { data: paciente } = await supabase
+    .from('pacientes')
+    .select('id')
+    .eq('id_auth_user', user.id)
+    .single()
+
+  if (!paciente) {
+    return (
+      <main className="page-shell">
+        <EmptyState
+          icon={ClipboardList}
+          title="Perfil de paciente no encontrado"
+          description="No se pudo encontrar un perfil asociado a tu usuario."
+        />
+      </main>
+    )
+  }
 
   const { data, error: dbError } = await supabase
     .from('citas')
@@ -74,72 +91,92 @@ export default async function MisCitasPage() {
       especialidades(nombre),
       medicos(nombre_completo)
     `)
+    .eq('id_paciente', paciente.id)
     .order('fecha_hora', { ascending: false })
 
   const citas = data as unknown as CitaRespuesta[] | null
 
   return (
-    <main className="flex flex-col p-6 max-w-5xl mx-auto w-full">
-      <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
-        <h1 className="text-3xl font-bold text-primary">Mis Videoconsultas</h1>
-        <Link 
-          href="/mis-citas/historial" 
-          className="bg-secondary/10 text-secondary hover:bg-secondary/20 px-4 py-2 rounded-md font-semibold text-sm transition-colors"
-        >
-          Ver Historial Clínico
-        </Link>
+    <main className="page-shell grid gap-6">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div className="grid gap-2">
+          <span className="section-kicker">Seguimiento</span>
+          <h1 className="text-3xl font-extrabold text-primary sm:text-4xl">Mis videoconsultas</h1>
+          <p className="text-sm text-on-surface-variant">Consulta tus próximas citas, pagos pendientes y accesos a Zoom.</p>
+        </div>
+        <div className="grid gap-2 sm:flex sm:items-center">
+          <Link href="/agendar-cita" className="btn-primary w-full sm:w-auto">
+            <CalendarPlus className="h-5 w-5" />
+            Agendar cita
+          </Link>
+          <Link href="/mis-citas/historial" className="btn-outline w-full sm:w-auto">
+            <FileText className="h-5 w-5" />
+            Historial
+          </Link>
+        </div>
       </div>
 
       {dbError ? (
-        <div className="bg-red-50 text-red-600 p-4 rounded-md">Error al cargar las citas: {dbError.message}</div>
+        <div className="alert-error">Error al cargar las citas: {dbError.message}</div>
       ) : !citas || citas.length === 0 ? (
-        <div className="bg-surface border border-foreground/10 p-8 rounded-xl text-center text-foreground/60">
-          No tienes ninguna cita registrada.
-        </div>
+        <EmptyState
+          icon={ClipboardList}
+          title="Aún no tienes citas"
+          description="Agenda tu primera videoconsulta y el sistema la mostrará aquí con su estado actualizado."
+          actionHref="/agendar-cita"
+          actionLabel="Agendar cita"
+        />
       ) : (
         <div className="grid gap-4">
           {citas.map((cita) => (
-            <div key={cita.id} className="bg-white dark:bg-black/20 p-6 rounded-xl shadow-sm border border-foreground/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h3 className="font-bold text-lg">
-                  {cita.especialidades?.nombre || 'Especialidad'} - Dr(a). {cita.medicos?.nombre_completo || 'No asignado'}
-                </h3>
-                <p className="text-foreground/70">{new Date(cita.fecha_hora).toLocaleString('es-EC', { timeZone: 'America/Guayaquil' })}</p>
-                <div className="mt-2 flex flex-col gap-2 text-sm">
-                  <div>
-                    <span className={`font-semibold px-2 py-1 rounded-md uppercase text-xs tracking-wider ${badgeEstado(cita.estado)}`}>
-                      {etiquetaEstado(cita.estado)}
-                    </span>
-                  </div>
-                  {cita.requiere_valoracion_presencial && (
-                    <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-md border border-red-200 dark:border-red-800 text-xs mt-1 flex gap-2 items-start">
-                      <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <strong>Atención:</strong> Sus síntomas persisten o requieren valoración presencial. Por favor acuda a la clínica más cercana.
-                      </div>
-                    </div>
-                  )}
+            <article key={cita.id} className="card grid gap-4 p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+              <div className="min-w-0">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <span className={`status-pill ${badgeEstado(cita.estado)}`}>
+                    {etiquetaEstado(cita.estado)}
+                  </span>
+                  <span className="text-xs font-semibold text-on-surface-variant">
+                    {new Date(cita.fecha_hora).toLocaleString('es-EC', { timeZone: 'America/Guayaquil', dateStyle: 'medium', timeStyle: 'short' })}
+                  </span>
                 </div>
+
+                <h2 className="text-lg font-extrabold text-on-surface">
+                  {cita.especialidades?.nombre || 'Especialidad médica'}
+                </h2>
+                <p className="mt-1 text-sm text-on-surface-variant">
+                  Dr(a). {cita.medicos?.nombre_completo || 'No asignado'}
+                </p>
+
+                {cita.requiere_valoracion_presencial && (
+                  <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <p>
+                      <strong>Atención:</strong> Tus síntomas requieren valoración presencial. Acude a la clínica más cercana.
+                    </p>
+                  </div>
+                )}
               </div>
-              <div className="flex gap-2">
+
+              <div className="flex flex-col gap-2 sm:min-w-40">
                 {cita.estado === 'pendiente_pago' && (
                   <Link
                     href={`/pago?cita=${cita.id}`}
-                    className="bg-yellow-500 text-white px-5 py-2 rounded-md font-bold hover:bg-yellow-600 transition-colors text-sm"
+                    className="inline-flex items-center justify-center rounded-lg bg-yellow-500 px-4 py-2 text-sm font-extrabold text-white transition-colors hover:bg-yellow-600"
                   >
-                    Pagar ahora
+                    Confirmar pago
                   </Link>
                 )}
                 {(cita.estado === 'confirmada' || cita.estado === 'en_curso') && (
                   <Link
                     href={`/videoconsulta?cita=${cita.id}`}
-                    className="bg-primary text-white px-5 py-2 rounded-md font-bold hover:bg-primary/90 transition-colors text-sm"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-extrabold text-white transition-colors hover:bg-primary/90"
                   >
-                    Conectarse a Zoom
+                    <Video className="h-4 w-4" />
+                    Conectarse
                   </Link>
                 )}
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
