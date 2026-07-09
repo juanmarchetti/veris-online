@@ -317,8 +317,6 @@ button, input, textarea, select {
 }
 
 .icon-button {
-  display: inline-grid;
-  place-items: center;
   min-width: 2.5rem;
   height: 2.5rem;
   border: 1px solid var(--outline-variant);

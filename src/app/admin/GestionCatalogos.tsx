@@ -134,10 +134,10 @@ function TablaEspecialidades({ items }: { items: Especialidad[] }) {
                     <td className="px-4 py-3 text-on-surface">${esp.precio_base.toFixed(2)}</td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
-                        <button type="button" onClick={() => setEditId(esp.id)} className="icon-button" aria-label="Editar especialidad">
+                        <button type="button" onClick={() => setEditId(esp.id)} className="inline-grid place-items-center icon-button" aria-label="Editar especialidad">
                           <Pencil className="h-4 w-4" />
                         </button>
-                        <button type="button" onClick={() => handleDelete(esp.id)} disabled={isPending} className="icon-button text-error" aria-label="Eliminar especialidad">
+                        <button type="button" onClick={() => handleDelete(esp.id)} disabled={isPending} className="inline-grid place-items-center icon-button text-error" aria-label="Eliminar especialidad">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -249,10 +249,10 @@ function TablaConvenios({ items }: { items: Convenio[] }) {
                     <td className="px-4 py-3 font-semibold text-on-surface">{conv.nombre_aseguradora}</td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
-                        <button type="button" onClick={() => setEditId(conv.id)} className="icon-button" aria-label="Editar convenio">
+                        <button type="button" onClick={() => setEditId(conv.id)} className="inline-grid place-items-center icon-button" aria-label="Editar convenio">
                           <Pencil className="h-4 w-4" />
                         </button>
-                        <button type="button" onClick={() => handleDelete(conv.id)} disabled={isPending} className="icon-button text-error" aria-label="Eliminar convenio">
+                        <button type="button" onClick={() => handleDelete(conv.id)} disabled={isPending} className="inline-grid place-items-center icon-button text-error" aria-label="Eliminar convenio">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
