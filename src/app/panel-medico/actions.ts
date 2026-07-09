@@ -84,7 +84,7 @@ export async function finalizarCitaMedico(
   if (updateError) return { error: updateError.message }
   
   // Insert in historial_clinico
-  const { error: historialError } = await supabase.from('historial_clinico').insert({
+  const { error: historialError } = await adminClient.from('historial_clinico').insert({
     id_paciente: cita.id_paciente,
     id_medico: medico.id,
     id_cita: idCita,
@@ -98,7 +98,7 @@ export async function finalizarCitaMedico(
 
   if (historialError) {
     console.error('Error insertando en historial', historialError)
-    return { error: 'Error al guardar el historial clínico.' }
+    return { error: 'Error al guardar el historial clínico: ' + (historialError.message || JSON.stringify(historialError)) }
   }
 
   // Notificar al paciente por correo (simulado o real)
