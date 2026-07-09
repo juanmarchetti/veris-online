@@ -121,8 +121,8 @@ export default async function Home() {
             <div className="flex items-start gap-3 text-sm text-on-surface-variant">
               <Headphones className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
               <p>
-                Soporte Contact Center: <strong className="text-on-surface">6009600</strong>. Si tu historial Veris
-                aun no esta validado, el equipo de soporte debe habilitarlo antes de agendar.
+                Soporte Contact Center: <strong className="text-on-surface">6009600</strong>. El registro web habilita
+                el agendamiento automaticamente; soporte queda disponible para ayuda operativa.
               </p>
             </div>
           </div>

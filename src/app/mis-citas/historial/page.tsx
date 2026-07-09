@@ -95,14 +95,7 @@ type HistorialRegistro = {
           &larr; Volver a Mis Citas
         </Link>
       </div>
-
-      {!paciente.historial_clinico_veris && (
-        <div className="bg-yellow-50 text-yellow-800 p-4 rounded-md mb-6 text-sm border border-yellow-200">
-          Nota: Aún no has vinculado tu historial clínico presencial de Veris. Solo se mostrarán los registros de tus videoconsultas.
-        </div>
-      )}
-
-      {dbError ? (
+{dbError ? (
         <div className="bg-red-50 text-red-600 p-4 rounded-md">Error al cargar historial: {dbError.message}</div>
       ) : !historial || historial.length === 0 ? (
         <div className="bg-surface border border-foreground/10 p-8 rounded-xl text-center text-foreground/60">

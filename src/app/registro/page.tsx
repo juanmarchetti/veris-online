@@ -89,7 +89,7 @@ export default function RegistroPage() {
         correo,
         telefono,
         cuenta_registrada_portal: true,
-        historial_clinico_veris: false
+        historial_clinico_veris: true
       });
 
       if (dbError) {

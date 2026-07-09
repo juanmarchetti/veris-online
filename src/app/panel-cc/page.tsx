@@ -65,7 +65,7 @@ export default async function PanelContactCenterPage() {
         <div>
           <h1 className="text-3xl font-bold text-primary">Panel Contact Center</h1>
           <p className="mt-1 text-sm text-on-surface-variant">
-            Valida pacientes sin historial clinico Veris antes de que puedan agendar una videoconsulta.
+            Revisa y corrige excepciones administrativas del historial de pacientes. El agendamiento web ya esta automatizado.
           </p>
         </div>
         <div className="card flex items-center gap-3 px-5 py-4">
@@ -95,7 +95,7 @@ export default async function PanelContactCenterPage() {
             <CheckCircle2 className="h-12 w-12 text-secondary" />
             <div>
               <h2 className="text-lg font-bold text-primary">No hay pacientes pendientes</h2>
-              <p className="text-sm text-on-surface-variant">Todos los pacientes registrados tienen historial validado.</p>
+              <p className="text-sm text-on-surface-variant">No hay pacientes pendientes de revision administrativa.</p>
             </div>
           </div>
         ) : (
@@ -105,7 +105,7 @@ export default async function PanelContactCenterPage() {
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="text-lg font-bold text-on-surface">{paciente.nombre_completo}</h2>
-                    <span className="badge badge-agente">Historial pendiente</span>
+                    <span className="badge badge-agente">Revision pendiente</span>
                   </div>
                   <div className="mt-2 grid gap-1 text-sm text-on-surface-variant sm:grid-cols-2">
                     <p>
@@ -138,7 +138,7 @@ export default async function PanelContactCenterPage() {
                   />
                   <button type="submit" className="btn-primary w-full md:w-auto">
                     <CheckCircle2 className="h-4 w-4" />
-                    Validar historial
+                    Confirmar historial
                   </button>
                 </form>
               </article>

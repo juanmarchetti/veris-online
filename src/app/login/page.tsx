@@ -77,7 +77,7 @@ export default function LoginPage() {
                 correo: authData.user.email,
                 telefono: user_metadata.telefono || '',
                 cuenta_registrada_portal: true,
-                historial_clinico_veris: false
+                historial_clinico_veris: true
               });
               if (insertError) {
                 console.error('Error insertando paciente post-login:', insertError);
