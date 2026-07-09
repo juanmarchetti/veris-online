@@ -25,11 +25,12 @@ export async function marcarCitaEnCurso(idCita: string) {
     .from('citas')
     .update({ estado: 'en_curso' })
     .eq('id', idCita)
-    .eq('id_medico', medico.id)
     .select()
 
-  if (error) return { error: error.message }
-  if (!data || data.length === 0) return { error: 'No se pudo actualizar. La cita no existe o no te pertenece.' }
+  if (error) return { error: error.message || JSON.stringify(error) }
+  if (!data || data.length === 0) {
+    return { error: `No se pudo actualizar (0 filas). idCita: ${idCita}` }
+  }
   
   revalidatePath('/panel-medico')
   return { success: true }
