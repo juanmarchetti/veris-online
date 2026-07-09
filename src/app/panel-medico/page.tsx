@@ -8,6 +8,7 @@ import EmptyState from '@/components/EmptyState'
 import AccionesCitaMedico from './AccionesCitaMedico'
 import ConfiguracionHorario from './ConfiguracionHorario'
 import HistorialConsultas from './HistorialConsultas'
+import SolicitudesUrgentes from './SolicitudesUrgentes'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,6 +19,7 @@ type CitaMedico = {
   motivo_consulta: string
   pacientes: { nombre_completo: string; correo: string } | null
   especialidades: { nombre: string } | null
+  es_urgente: boolean
 }
 
 function badgeEstado(estado: string) {
@@ -88,6 +90,7 @@ export default async function PanelMedicoPage() {
       fecha_hora,
       estado,
       motivo_consulta,
+      es_urgente,
       pacientes(nombre_completo, correo),
       especialidades(nombre)
     `)
@@ -97,10 +100,14 @@ export default async function PanelMedicoPage() {
   const especialidadMedico = (medico.especialidades as unknown as { nombre: string } | null)?.nombre
   const citas = data as unknown as CitaMedico[] | null
   const citasList = citas ?? []
+  
+  const solicitudesUrgentes = citasList.filter(c => c.estado === 'pendiente_aceptacion_medico' && c.es_urgente)
+  const citasNormales = citasList.filter(c => c.estado !== 'pendiente_aceptacion_medico' || !c.es_urgente)
+
   const hoy = new Date().toISOString().slice(0, 10)
-  const citasHoy = citasList.filter(cita => cita.fecha_hora.slice(0, 10) === hoy).length
-  const citasActivas = citasList.filter(cita => ['confirmada', 'en_curso', 'agendada'].includes(cita.estado)).length
-  const citasFinalizadas = citasList.filter(cita => cita.estado === 'finalizada').length
+  const citasHoy = citasNormales.filter(cita => cita.fecha_hora.slice(0, 10) === hoy).length
+  const citasActivas = citasNormales.filter(cita => ['confirmada', 'en_curso', 'agendada'].includes(cita.estado)).length
+  const citasFinalizadas = citasNormales.filter(cita => cita.estado === 'finalizada').length
 
   const { data: historialData } = await supabase
     .from('historial_clinico')
@@ -165,6 +172,8 @@ export default async function PanelMedicoPage() {
         }}
       />
 
+      <SolicitudesUrgentes citas={solicitudesUrgentes} />
+
       <section className="grid gap-4">
         <div>
           <h2 className="text-xl font-extrabold text-on-surface">Mis citas asignadas</h2>
@@ -173,7 +182,7 @@ export default async function PanelMedicoPage() {
 
         {citasError ? (
           <div className="alert-error">Error al cargar las citas: {citasError.message}</div>
-        ) : citasList.length === 0 ? (
+        ) : citasNormales.length === 0 ? (
           <EmptyState
             icon={ClipboardList}
             title="Sin citas asignadas"
@@ -181,7 +190,7 @@ export default async function PanelMedicoPage() {
           />
         ) : (
           <div className="grid gap-4">
-            {citasList.map((cita) => (
+            {citasNormales.map((cita) => (
               <article key={cita.id} className="card grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                 <div className="min-w-0">
                   <div className="mb-3 flex flex-wrap items-center gap-2">

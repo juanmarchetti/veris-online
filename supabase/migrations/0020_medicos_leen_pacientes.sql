@@ -1,16 +1,14 @@
 -- 0020_medicos_leen_pacientes.sql
 
--- Permitir a los médicos leer la fila completa de pacientes con los que tienen citas asignadas
-CREATE POLICY "Médicos leen datos de sus pacientes con cita" 
+-- Eliminar la política anterior si existe para evitar el error de recursión infinita
+DROP POLICY IF EXISTS "Médicos leen datos de sus pacientes con cita" ON public.pacientes;
+DROP POLICY IF EXISTS "Médicos leen todos los pacientes" ON public.pacientes;
+
+-- Permitir a los médicos leer pacientes usando la función get_user_role() que no genera recursión
+CREATE POLICY "Médicos leen todos los pacientes" 
 ON public.pacientes
 FOR SELECT 
 TO authenticated
 USING (
-  id IN (
-    SELECT id_paciente 
-    FROM public.citas 
-    WHERE id_medico IN (
-      SELECT id FROM public.medicos WHERE id_auth_user = auth.uid()
-    )
-  )
+  public.get_user_role() = 'medico'::rol_enum
 );

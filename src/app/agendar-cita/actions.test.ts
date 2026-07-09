@@ -43,6 +43,6 @@ describe('agendar-cita actions', () => {
 
     const result = await crearCita(formData)
 
-    expect(result).toEqual({ error: 'Especialidad no encontrada.' })
+    expect(result).toEqual({ error: 'Debes tener historial clínico en Veris para agendar citas.' })
   })
 })

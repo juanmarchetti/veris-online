@@ -18,6 +18,7 @@ import 'react-day-picker/dist/style.css'
 import { format, parseISO, startOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useRouter } from 'next/navigation'
+import { crearSolicitudUrgente } from './actions'
 import {
   Calendar,
   Clock,
@@ -90,6 +91,7 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
   const [medicoId, setMedicoId]             = useState('')
   const [convenioId, setConvenioId]         = useState('')
   const [duracion, setDuracion]             = useState(30)
+  const [esUrgente, setEsUrgente]           = useState(false)
 
   // Paso 2
   const [diasSeleccionados, setDiasSeleccionados] = useState<Date[]>([])
@@ -161,6 +163,28 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
     }
   }
 
+  const enviarUrgencia = async () => {
+    if (!especialidadId) { setError('Selecciona una especialidad.'); return }
+    if (!medicoId)       { setError('Selecciona un médico.'); return }
+    if (!motivo.trim())  { setError('Describe el motivo de la urgencia.'); return }
+    setError('')
+    setBuscando(true)
+
+    const fd = new FormData()
+    fd.append('id_especialidad', especialidadId)
+    fd.append('id_medico', medicoId)
+    fd.append('id_convenio', convenioId)
+    fd.append('motivo_consulta', motivo)
+    
+    startTransition(async () => {
+      const result = await crearSolicitudUrgente(fd)
+      if (result?.error) {
+        setError(result.error)
+        setBuscando(false)
+      }
+    })
+  }
+
   // ── Confirmar cita y redirigir a pago ─────────────────────────────────────
   const confirmarYPagar = () => {
     if (!slotAsignado) return
@@ -227,6 +251,19 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
             </p>
           </div>
 
+          <div className="flex items-center gap-2 rounded border border-red-200 bg-red-50 p-4">
+            <input 
+              type="checkbox" 
+              id="urgencia" 
+              checked={esUrgente} 
+              onChange={(e) => setEsUrgente(e.target.checked)} 
+              className="w-5 h-5 text-red-600 rounded focus:ring-red-500"
+            />
+            <label htmlFor="urgencia" className="font-semibold text-red-700 cursor-pointer">
+              Marcar como urgente (atención inmediata)
+            </label>
+          </div>
+
           <div className="flex flex-col gap-4">
             {/* Especialidad */}
             <div>
@@ -264,19 +301,21 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
               </select>
             </div>
 
-            {/* Duración */}
-            <div>
-              <label className="input-label">Duración de la consulta *</label>
-              <select
-                className="input-field"
-                value={duracion}
-                onChange={(e) => setDuracion(Number(e.target.value))}
-              >
-                {DURACIONES.map(d => (
-                  <option key={d.valor} value={d.valor}>{d.etiqueta}</option>
-                ))}
-              </select>
-            </div>
+            {/* Duración (solo si no es urgente) */}
+            {!esUrgente && (
+              <div>
+                <label className="input-label">Duración de la consulta *</label>
+                <select
+                  className="input-field"
+                  value={duracion}
+                  onChange={(e) => setDuracion(Number(e.target.value))}
+                >
+                  {DURACIONES.map(d => (
+                    <option key={d.valor} value={d.valor}>{d.etiqueta}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Convenio */}
             <div>
@@ -292,12 +331,35 @@ export default function FormAgendaAutomatica({ especialidades, medicos, convenio
                 ))}
               </select>
             </div>
+            
+            {esUrgente && (
+              <div>
+                <label className="input-label text-red-700">Motivo de la urgencia *</label>
+                <textarea
+                  rows={3}
+                  className="input-field border-red-300 focus:border-red-500 focus:ring-red-500"
+                  placeholder="Describe tus síntomas urgentes..."
+                  value={motivo}
+                  onChange={(e) => setMotivo(e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
-          <button className="btn-primary" onClick={irPaso2}>
-            Continuar
-            <ArrowRight size={16} />
-          </button>
+          {esUrgente ? (
+            <button className="btn-primary bg-red-600 hover:bg-red-700" onClick={enviarUrgencia} disabled={buscando || isPending}>
+              {(buscando || isPending) ? (
+                <><Loader2 size={16} className="animate-spin" /> Solicitando...</>
+              ) : (
+                <><AlertTriangle size={16} /> Solicitar Cita Urgente</>
+              )}
+            </button>
+          ) : (
+            <button className="btn-primary" onClick={irPaso2}>
+              Continuar
+              <ArrowRight size={16} />
+            </button>
+          )}
         </div>
       )}
 

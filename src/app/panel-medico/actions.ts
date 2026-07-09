@@ -228,3 +228,54 @@ export async function actualizarHorarioMedico(formData: FormData) {
   revalidatePath('/panel-medico')
   return { ok: true }
 }
+
+export async function aceptarCitaUrgente(idCita: string) {
+  const { error: authError, user } = await verificarUsuario(['medico'])
+  if (authError || !user) return { error: 'No autorizado.' }
+
+  const supabase = await createClient()
+
+  const { data, error } = await supabase.rpc('aceptar_cita_urgente', { p_id_cita: idCita })
+  if (error) return { error: error.message }
+
+  if (data && Array.isArray(data)) {
+    const { enviarCorreoReprogramacion } = await import('@/utils/resend')
+    for (const desplazada of data) {
+      try {
+        await enviarCorreoReprogramacion(desplazada.id_cita, desplazada.minutos_retraso)
+      } catch (err) {
+        console.error('Error enviando correo reprogramacion', err)
+      }
+    }
+  }
+
+  try {
+    const { enviarCorreoResultadoUrgencia } = await import('@/utils/resend')
+    await enviarCorreoResultadoUrgencia(idCita, true)
+  } catch (err) {
+    console.error('Error enviando correo resultado', err)
+  }
+
+  revalidatePath('/panel-medico')
+  return { success: true }
+}
+
+export async function rechazarCitaUrgente(idCita: string) {
+  const { error: authError, user } = await verificarUsuario(['medico'])
+  if (authError || !user) return { error: 'No autorizado.' }
+
+  const supabase = await createClient()
+
+  const { error } = await supabase.rpc('rechazar_cita_urgente', { p_id_cita: idCita })
+  if (error) return { error: error.message }
+
+  try {
+    const { enviarCorreoResultadoUrgencia } = await import('@/utils/resend')
+    await enviarCorreoResultadoUrgencia(idCita, false)
+  } catch (err) {
+    console.error('Error enviando correo resultado', err)
+  }
+
+  revalidatePath('/panel-medico')
+  return { success: true }
+}
