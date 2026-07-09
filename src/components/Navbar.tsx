@@ -66,7 +66,8 @@ export default async function Navbar() {
             <>
               {rol === 'paciente' && (
                 <>
-                  <NavLink href="/agendar-cita">Inicio</NavLink>
+                  <NavLink href="/inicio">Inicio</NavLink>
+                  <NavLink href="/agendar-cita">Agendar cita</NavLink>
                   <NavLink href="/mis-citas">Mis citas</NavLink>
                   <NavLink href="/mis-citas/historial">Historial</NavLink>
                   <NavLink href="/ayuda">Ayuda</NavLink>

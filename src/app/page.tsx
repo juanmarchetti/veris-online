@@ -18,7 +18,7 @@ export default async function Home() {
       if (perfil.rol === 'admin') redirect('/admin')
       if (perfil.rol === 'agente_cc') redirect('/panel-cc')
       if (perfil.rol === 'medico') redirect('/panel-medico')
-      if (perfil.rol === 'paciente') redirect('/mis-citas')
+      if (perfil.rol === 'paciente') redirect('/inicio')
     }
   }
 
