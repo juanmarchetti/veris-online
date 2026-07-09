@@ -45,6 +45,7 @@ export async function finalizarCitaMedico(
     requiere_valoracion_presencial: boolean
   }
 ) {
+  try {
   const { error: authError, user } = await verificarUsuario(['medico'])
   if (authError || !user) return { error: 'No autorizado.' }
 
@@ -128,6 +129,9 @@ export async function finalizarCitaMedico(
 
   revalidatePath('/panel-medico')
   return { success: true }
+  } catch (err: any) {
+    return { error: 'Excepción no controlada: ' + (err.message || String(err)) }
+  }
 }
 
 export async function agregarDocumentoClinico(formData: FormData) {
