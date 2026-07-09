@@ -23,6 +23,21 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Pagos sandbox
+
+El checkout de pago corre en modo sandbox por defecto. Este modo aprueba pagos de prueba, confirma la cita y no cobra dinero real.
+
+Variables recomendadas en Netlify:
+
+```env
+PAYMENTS_MODE=sandbox
+NEXT_PUBLIC_PAYMENTS_MODE=sandbox
+```
+
+Para probar el flujo usa la tarjeta `4242 4242 4242 4242`, vencimiento `12/30` y CVV `123`.
+
+Aplica la migracion `supabase/migrations/0024_pago_sandbox_metadata.sql` en Supabase para guardar la referencia `SBX`, el ambiente y el detalle del pago de prueba.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

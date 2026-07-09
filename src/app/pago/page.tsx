@@ -2,6 +2,7 @@ import { verificarUsuario } from '@/utils/auth'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { expirarPagosPendientes } from '@/utils/expirarPagos'
+import { getPaymentsMode } from '@/utils/payments'
 import PagoSimulador from './PagoSimulador'
 
 type PagoData = {
@@ -79,6 +80,7 @@ export default async function PagoPage({
 
   const pago = data as unknown as PagoData
   const cita = pago.citas
+  const paymentsMode = getPaymentsMode()
 
   return (
     <main className="flex flex-col items-center p-6">
@@ -92,6 +94,7 @@ export default async function PagoPage({
         especialidad={cita?.especialidades?.nombre ?? 'Especialidad'}
         medico={cita?.medicos?.nombre_completo ?? 'No asignado'}
         fechaHora={cita?.fecha_hora ?? ''}
+        paymentsMode={paymentsMode}
       />
     </main>
   )

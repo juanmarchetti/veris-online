@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { simularPagoAprobado } from './actions'
+import { procesarPagoSandbox } from './actions'
 import { createClient } from '@/utils/supabase/server'
 import { generarEnlaceZoom } from '@/utils/zoom'
 
@@ -19,7 +19,7 @@ vi.mock('@/utils/resend', () => ({
   enviarCorreoConfirmacion: vi.fn()
 }))
 
-describe('pago actions - simularPagoAprobado', () => {
+describe('pago actions - procesarPagoSandbox', () => {
   const mockSupabase = {
     auth: { getUser: vi.fn() },
     from: vi.fn(),
@@ -45,12 +45,28 @@ describe('pago actions - simularPagoAprobado', () => {
     // Zoom lanza error
     vi.mocked(generarEnlaceZoom).mockRejectedValue(new Error('Zoom API Error mock'))
 
-    const result = await simularPagoAprobado('cita-123')
+    const result = await procesarPagoSandbox('cita-123', {
+      last4: '4242',
+      titular: 'PACIENTE PRUEBA',
+      marca: 'visa-test'
+    })
 
-    expect(result).toEqual({ success: true })
-    expect(mockSupabase.rpc).toHaveBeenCalledWith('aprobar_pago_simulado', {
+    expect(result).toEqual({
+      success: true,
+      referenciaPago: expect.stringMatching(/^SBX-/)
+    })
+    expect(mockSupabase.rpc).toHaveBeenCalledWith('aprobar_pago_sandbox', {
       p_id_cita: 'cita-123',
-      p_enlace_zoom: null // Debe ser null por el error
+      p_enlace_zoom: null,
+      p_metodo_pago: 'sandbox',
+      p_referencia_pago: expect.stringMatching(/^SBX-/),
+      p_ambiente_pago: 'sandbox',
+      p_detalle_pago: {
+        origen: 'checkout_sandbox',
+        last4: '4242',
+        titular: 'PACIENTE PRUEBA',
+        marca: 'visa-test'
+      }
     })
   })
 })
