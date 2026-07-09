@@ -34,6 +34,17 @@ PAYMENTS_MODE=sandbox
 NEXT_PUBLIC_PAYMENTS_MODE=sandbox
 ```
 
+## SEO y dominio
+
+Variables recomendadas en Netlify:
+
+```env
+NEXT_PUBLIC_SITE_URL=https://tu-sitio.netlify.app
+NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=token_entregado_por_google_search_console
+```
+
+`NEXT_PUBLIC_SITE_URL` alimenta canonical, sitemap, manifest y datos estructurados. `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` permite validar el sitio en Google Search Console cuando el jurado o el propietario del dominio necesite indexarlo.
+
 Para probar el flujo usa la tarjeta `4242 4242 4242 4242`, vencimiento `12/30` y CVV `123`.
 
 Aplica la migracion `supabase/migrations/0024_pago_sandbox_metadata.sql` en Supabase para guardar la referencia `SBX`, el ambiente y el detalle del pago de prueba.

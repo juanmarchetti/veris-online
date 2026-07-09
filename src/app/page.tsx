@@ -60,7 +60,7 @@ export default async function Home() {
       <section className="border-b border-outline-variant bg-surface-container-lowest">
         <div className="page-shell grid min-h-[calc(100vh-190px)] content-center gap-8 py-10 sm:py-14">
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-            <BrandLogo href="/" />
+            <BrandLogo href="/" size="lg" />
             <span className="section-kicker">
               <ShieldCheck className="h-4 w-4" />
               Portal médico conectado a Supabase

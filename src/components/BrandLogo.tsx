@@ -4,27 +4,57 @@ type BrandLogoProps = {
   href?: string
   compact?: boolean
   className?: string
+  size?: 'sm' | 'md' | 'lg'
 }
 
-function Mark() {
+const sizes = {
+  sm: {
+    mark: 'h-9 w-9',
+    icon: 'h-6 w-6',
+    name: 'text-base',
+    suffix: 'text-xs',
+  },
+  md: {
+    mark: 'h-11 w-11',
+    icon: 'h-7 w-7',
+    name: 'text-lg',
+    suffix: 'text-sm',
+  },
+  lg: {
+    mark: 'h-14 w-14',
+    icon: 'h-9 w-9',
+    name: 'text-2xl',
+    suffix: 'text-base',
+  },
+}
+
+function Mark({ size = 'md' }: { size?: BrandLogoProps['size'] }) {
+  const s = sizes[size ?? 'md']
+
   return (
-    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary text-white shadow-sm">
+    <span className={`relative grid ${s.mark} shrink-0 place-items-center overflow-hidden rounded-lg bg-primary text-white shadow-sm`}>
+      <span className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0)_58%)]" />
       <svg
         aria-hidden="true"
-        className="h-7 w-7"
-        viewBox="0 0 32 32"
+        className={`${s.icon} relative`}
+        viewBox="0 0 40 40"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M7 16.4L12.3 22L25 8.8"
+          d="M20 34C20 34 8 27.2 8 16.6C8 11.8 11.5 8 16 8C18.2 8 19.4 9 20 9.8C20.6 9 21.8 8 24 8C28.5 8 32 11.8 32 16.6C32 27.2 20 34 20 34Z"
+          fill="currentColor"
+          opacity="0.2"
+        />
+        <path
+          d="M8 20H14.2L17.2 13L22.5 28L25.6 20H32"
           stroke="currentColor"
-          strokeWidth="3.2"
+          strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <path
-          d="M9 10.5C10.7 7.8 13.2 6.5 16.1 6.5C21.4 6.5 25.5 10.6 25.5 16C25.5 21.4 21.4 25.5 16.1 25.5C10.7 25.5 6.5 21.4 6.5 16C6.5 15 6.7 14.1 7 13.2"
+          d="M28.5 10.8C30.7 12.2 32 14.5 32 17.2"
           stroke="currentColor"
           strokeWidth="1.8"
           strokeLinecap="round"
@@ -35,14 +65,15 @@ function Mark() {
   )
 }
 
-export default function BrandLogo({ href, compact = false, className = '' }: BrandLogoProps) {
+export default function BrandLogo({ href, compact = false, className = '', size = 'md' }: BrandLogoProps) {
+  const s = sizes[size]
   const content = (
     <>
-      <Mark />
+      <Mark size={size} />
       {!compact && (
         <span className="flex min-w-0 flex-col leading-none">
-          <span className="text-lg font-extrabold text-primary">Veris</span>
-          <span className="text-sm font-bold text-secondary">Online</span>
+          <span className={`${s.name} font-extrabold text-primary`}>Veris</span>
+          <span className={`${s.suffix} font-extrabold text-secondary`}>Online</span>
         </span>
       )}
     </>

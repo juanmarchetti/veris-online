@@ -4,8 +4,6 @@ import { verificarUsuario } from '@/utils/auth'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
-/* ─── Especialidades ─── */
-
 export async function crearEspecialidad(formData: FormData) {
   const { error: authError } = await verificarUsuario(['admin'])
   if (authError) return { error: 'No autorizado.' }
@@ -14,7 +12,7 @@ export async function crearEspecialidad(formData: FormData) {
   const precioBase = parseFloat(formData.get('precioBase') as string)
 
   if (!nombre) return { error: 'El nombre es requerido.' }
-  if (isNaN(precioBase) || precioBase < 0) return { error: 'Precio inválido.' }
+  if (Number.isNaN(precioBase) || precioBase < 0) return { error: 'Precio inválido.' }
 
   const admin = createAdminClient()
   const { error } = await admin.from('especialidades').insert({ nombre, precio_base: precioBase })
@@ -37,7 +35,7 @@ export async function editarEspecialidad(formData: FormData) {
   const precioBase = parseFloat(formData.get('precioBase') as string)
 
   if (!id || !nombre) return { error: 'Datos incompletos.' }
-  if (isNaN(precioBase) || precioBase < 0) return { error: 'Precio inválido.' }
+  if (Number.isNaN(precioBase) || precioBase < 0) return { error: 'Precio inválido.' }
 
   const admin = createAdminClient()
   const { error } = await admin.from('especialidades').update({ nombre, precio_base: precioBase }).eq('id', id)
@@ -66,8 +64,6 @@ export async function eliminarEspecialidad(id: string) {
   revalidatePath('/admin')
   return { error: null }
 }
-
-/* ─── Convenios ─── */
 
 export async function crearConvenio(formData: FormData) {
   const { error: authError } = await verificarUsuario(['admin'])

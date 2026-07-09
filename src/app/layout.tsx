@@ -14,6 +14,7 @@ const inter = Inter({
 });
 
 const siteUrl = getSiteUrl();
+const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -58,9 +59,57 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  verification: googleVerification ? { google: googleVerification } : undefined,
+  manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
   },
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "Veris Online",
+      url: siteUrl,
+      logo: `${siteUrl}/icon.svg`,
+    },
+    {
+      "@type": "MedicalBusiness",
+      "@id": `${siteUrl}/#medical-business`,
+      name: "Veris Online",
+      url: siteUrl,
+      medicalSpecialty: "Telemedicine",
+      areaServed: "EC",
+      parentOrganization: {
+        "@id": `${siteUrl}/#organization`,
+      },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      name: "Veris Online",
+      url: siteUrl,
+      inLanguage: "es-EC",
+      publisher: {
+        "@id": `${siteUrl}/#organization`,
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${siteUrl}/#software`,
+      name: "Veris Online",
+      applicationCategory: "HealthApplication",
+      operatingSystem: "Web",
+      url: siteUrl,
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -71,6 +120,10 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <WarningBanner />
         <Navbar />
         <div className="flex-1">
