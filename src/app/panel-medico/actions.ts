@@ -242,7 +242,7 @@ export async function aceptarCitaUrgente(idCita: string) {
     const { enviarCorreoReprogramacion } = await import('@/utils/resend')
     for (const desplazada of data) {
       try {
-        await enviarCorreoReprogramacion(desplazada.id_cita, desplazada.minutos_retraso)
+        await enviarCorreoReprogramacion(desplazada.out_id_cita, desplazada.out_minutos_retraso)
       } catch (err) {
         console.error('Error enviando correo reprogramacion', err)
       }

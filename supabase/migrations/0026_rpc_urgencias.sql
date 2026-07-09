@@ -1,9 +1,11 @@
+DROP FUNCTION IF EXISTS public.aceptar_cita_urgente(UUID);
+
 CREATE OR REPLACE FUNCTION public.aceptar_cita_urgente(p_id_cita UUID)
 RETURNS TABLE (
-  id_cita UUID,
-  id_paciente UUID,
-  nueva_fecha_hora TIMESTAMPTZ,
-  minutos_retraso INT
+  out_id_cita UUID,
+  out_id_paciente UUID,
+  out_nueva_fecha_hora TIMESTAMPTZ,
+  out_minutos_retraso INT
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
