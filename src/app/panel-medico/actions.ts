@@ -20,7 +20,8 @@ export async function marcarCitaEnCurso(idCita: string) {
   
   if (!medico) return { error: 'Perfil médico no encontrado.' }
 
-  const { data, error } = await supabase
+  const adminClient = createAdminClient()
+  const { data, error } = await adminClient
     .from('citas')
     .update({ estado: 'en_curso' })
     .eq('id', idCita)
@@ -68,13 +69,15 @@ export async function finalizarCitaMedico(
   if (citaError || !cita) return { error: 'No se pudo actualizar. La cita no existe o no te pertenece.' }
 
   // Update cita status
-  const { error: updateError } = await supabase
+  const adminClient = createAdminClient()
+  const { error: updateError } = await adminClient
     .from('citas')
     .update({ 
       estado: 'finalizada',
       requiere_valoracion_presencial: datosDiagnostico.requiere_valoracion_presencial
     })
     .eq('id', idCita)
+    .eq('id_medico', medico.id)
 
   if (updateError) return { error: updateError.message }
   
