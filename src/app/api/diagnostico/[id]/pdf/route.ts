@@ -22,7 +22,7 @@ export async function GET(
     .from('historial_clinico')
     .select(`
       *,
-      pacientes (id_auth_user, nombre_completo, identificacion, fecha_nacimiento),
+      pacientes (id_auth_user, nombre_completo, numero_identificacion),
       medicos (id_auth_user, nombre_completo),
       citas (fecha_hora, especialidades(nombre))
     `)
@@ -30,6 +30,7 @@ export async function GET(
     .single()
 
   if (dbError || !diagnostico) {
+    console.error('Error db pdf:', dbError)
     return new NextResponse('Diagnóstico no encontrado', { status: 404 })
   }
 
@@ -84,7 +85,7 @@ export async function GET(
     // Datos del Paciente
     drawText('DATOS DEL PACIENTE', 12, true, rgb(0.2, 0.2, 0.2))
     drawText(`Nombre: ${diagnostico.pacientes?.nombre_completo || 'N/A'}`)
-    drawText(`Identificación: ${diagnostico.pacientes?.identificacion || 'N/A'}`)
+    drawText(`Identificación: ${diagnostico.pacientes?.numero_identificacion || 'N/A'}`)
     y -= 10
 
     // Datos de la Consulta
