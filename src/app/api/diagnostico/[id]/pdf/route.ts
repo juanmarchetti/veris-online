@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { PDFDocument, rgb, StandardFonts, drawLines, lineString } from 'pdf-lib'
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import { verificarUsuario } from '@/utils/auth'
 
 export async function GET(
