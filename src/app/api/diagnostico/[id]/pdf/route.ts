@@ -107,7 +107,7 @@ export async function GET(
     const title = 'INFORME CLÍNICO'
     const titleWidth = fontBold.widthOfTextAtSize(title, 16)
     page.drawText(title, { x: width - margin - titleWidth, y: height - 45, size: 16, font: fontBold, color: rgb(1,1,1) })
-    const subtitle = \`Código: \${diagnostico.id.split('-')[0].toUpperCase()}\`
+    const subtitle = `Código: ${diagnostico.id.split('-')[0].toUpperCase()}`
     const subtitleWidth = font.widthOfTextAtSize(subtitle, 10)
     page.drawText(subtitle, { x: width - margin - subtitleWidth, y: height - 60, size: 10, font: font, color: rgb(0.8, 0.8, 0.8) })
 
@@ -130,15 +130,15 @@ export async function GET(
     // Columna 1: Paciente
     drawText('PACIENTE', 9, true, secondaryColor, col1, y - 20)
     drawText(diagnostico.pacientes?.nombre_completo || 'N/A', 11, true, textDark, col1, y - 35)
-    drawText(\`ID: \${diagnostico.pacientes?.numero_identificacion || 'N/A'}\`, 9, false, textGray, col1, y - 50)
-    drawText(\`Email: \${diagnostico.pacientes?.correo || 'N/A'}\`, 9, false, textGray, col1, y - 65)
+    drawText(`ID: ${diagnostico.pacientes?.numero_identificacion || 'N/A'}`, 9, false, textGray, col1, y - 50)
+    drawText(`Email: ${diagnostico.pacientes?.correo || 'N/A'}`, 9, false, textGray, col1, y - 65)
 
     // Columna 2: Consulta
     drawText('DATOS DE LA CONSULTA', 9, true, secondaryColor, col2, y - 20)
     const fechaFormat = new Date(diagnostico.citas?.fecha_hora || diagnostico.fecha).toLocaleString('es-EC', { dateStyle: 'long', timeStyle: 'short' })
-    drawText(\`Fecha: \${fechaFormat}\`, 9, false, textDark, col2, y - 35)
-    drawText(\`Especialidad: \${diagnostico.citas?.especialidades?.nombre || 'N/A'}\`, 9, false, textDark, col2, y - 50)
-    drawText(\`Médico: Dr(a). \${diagnostico.medicos?.nombre_completo || 'N/A'}\`, 9, true, textDark, col2, y - 65)
+    drawText(`Fecha: ${fechaFormat}`, 9, false, textDark, col2, y - 35)
+    drawText(`Especialidad: ${diagnostico.citas?.especialidades?.nombre || 'N/A'}`, 9, false, textDark, col2, y - 50)
+    drawText(`Médico: Dr(a). ${diagnostico.medicos?.nombre_completo || 'N/A'}`, 9, true, textDark, col2, y - 65)
 
     y -= 110
 
@@ -191,13 +191,13 @@ export async function GET(
     page.drawText('FIRMA ELECTRÓNICA VÁLIDA', { x: margin + 15, y: signY - 30, size: 24, font: fontBold, color: rgb(0.92, 0.92, 0.92) })
 
     drawText('FIRMADO ELECTRÓNICAMENTE POR:', 8, true, textGray, margin + 15, signY - 20)
-    drawText(\`Dr(a). \${diagnostico.medicos?.nombre_completo || 'N/A'}\`, 12, true, primaryColor, margin + 15, signY - 35)
-    drawText(\`Especialidad: \${diagnostico.citas?.especialidades?.nombre || 'General'}\`, 9, false, textGray, margin + 15, signY - 48)
+    drawText(`Dr(a). ${diagnostico.medicos?.nombre_completo || 'N/A'}`, 12, true, primaryColor, margin + 15, signY - 35)
+    drawText(`Especialidad: ${diagnostico.citas?.especialidades?.nombre || 'General'}`, 9, false, textGray, margin + 15, signY - 48)
     
     // Hash de firma simulado para dar el toque profesional
-    const hash = \`SHA256-\${diagnostico.id.replace(/-/g, '').substring(0, 32).toUpperCase()}\`
-    drawText(\`Sello Digital: \${hash}\`, 7, false, rgb(0.5, 0.5, 0.5), margin + 15, signY - 65)
-    drawText(\`Emitido el: \${fechaFormat}\`, 7, false, rgb(0.5, 0.5, 0.5), margin + 15, signY - 75)
+    const hash = `SHA256-${diagnostico.id.replace(/-/g, '').substring(0, 32).toUpperCase()}`
+    drawText(`Sello Digital: ${hash}`, 7, false, rgb(0.5, 0.5, 0.5), margin + 15, signY - 65)
+    drawText(`Emitido el: ${fechaFormat}`, 7, false, rgb(0.5, 0.5, 0.5), margin + 15, signY - 75)
 
     // === FOOTER ===
     const footerY = 30
@@ -222,7 +222,7 @@ export async function GET(
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': \`inline; filename="Diagnostico_\${(diagnostico.pacientes?.nombre_completo || 'Paciente').replace(/\\s+/g, '_')}_\${new Date(diagnostico.fecha).toISOString().split('T')[0]}.pdf"\`,
+        'Content-Disposition': `inline; filename="Diagnostico_${(diagnostico.pacientes?.nombre_completo || 'Paciente').replace(/\s+/g, '_')}_${new Date(diagnostico.fecha).toISOString().split('T')[0]}.pdf"`,
       },
     })
   } catch (err: unknown) {
